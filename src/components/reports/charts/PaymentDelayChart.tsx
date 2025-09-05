@@ -1,6 +1,6 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { AlertTriangle, Clock, Users, TrendingDown } from 'lucide-react';
+import { AlertTriangle, Clock, Users, TrendingDown, CheckCircle } from 'lucide-react';
 
 interface DelayData {
   clientName: string;

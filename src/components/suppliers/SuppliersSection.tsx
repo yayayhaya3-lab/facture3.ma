@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useSupplier } from '../../contexts/SupplierContext';
 import { useLicense } from '../../contexts/LicenseContext';
+import SupplierDetailView from './SupplierDetailView';
 import AddSupplierModal from './AddSupplierModal';
 import EditSupplierModal from './EditSupplierModal';
-import SupplierDetailModal from './SupplierDetailModal';
 import { Plus, Search, Edit, Trash2, Eye, Phone, Mail, Building2, Crown, AlertTriangle } from 'lucide-react';
 
 export default function SuppliersSection() {
@@ -15,6 +15,19 @@ export default function SuppliersSection() {
   const [editingSupplier, setEditingSupplier] = useState<string | null>(null);
   const [viewingSupplier, setViewingSupplier] = useState<string | null>(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
+  // Si on visualise un fournisseur, afficher la vue détaillée
+  if (viewingSupplier) {
+    const supplier = suppliers.find(s => s.id === viewingSupplier);
+    if (supplier) {
+      return (
+        <SupplierDetailView 
+          supplier={supplier}
+          onBack={() => setViewingSupplier(null)}
+        />
+      );
+    }
+  }
 
   const filteredSuppliers = suppliers.filter(supplier => {
     const matchesSearch = supplier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -307,14 +320,6 @@ export default function SuppliersSection() {
           isOpen={!!editingSupplier}
           onClose={() => setEditingSupplier(null)}
           supplier={suppliers.find(s => s.id === editingSupplier)!}
-        />
-      )}
-
-      {viewingSupplier && (
-        <SupplierDetailModal
-          isOpen={!!viewingSupplier}
-          onClose={() => setViewingSupplier(null)}
-          supplier={suppliers.find(s => s.id === viewingSupplier)!}
         />
       )}
     </div>

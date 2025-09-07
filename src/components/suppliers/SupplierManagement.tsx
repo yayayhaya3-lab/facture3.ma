@@ -25,6 +25,10 @@ import {
 } from 'lucide-react';
 import { format, subMonths, startOfMonth, endOfMonth, differenceInDays, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import SupplierDistributionChart from './charts/SupplierDistributionChart';
+import SupplierEvolutionChart from './charts/SupplierEvolutionChart';
+import SupplierHeatmapChart from './charts/SupplierHeatmapChart';
+import SupplierReliabilityChart from './charts/SupplierReliabilityChart';
 import html2pdf from 'html2pdf.js';
 
 export default function SupplierManagement() {
@@ -218,7 +222,8 @@ export default function SupplierManagement() {
     { id: 'dashboard', label: 'Tableau de Bord', icon: LayoutDashboard },
     { id: 'distribution', label: 'Répartition', icon: PieChart },
     { id: 'evolution', label: 'Évolution', icon: TrendingUp },
-    { id: 'analysis', label: 'Analyse', icon: Target }
+    { id: 'heatmap', label: 'Heatmap', icon: Activity },
+    { id: 'analysis', label: 'Analyse Avancée', icon: Target }
   ];
 
   const getPeriodLabel = () => {
@@ -595,212 +600,30 @@ export default function SupplierManagement() {
       )}
 
       {activeTab === 'distribution' && (
-        <div className="space-y-6">
-          {/* Graphique de répartition */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Répartition des Commandes par Fournisseur</h3>
-                <p className="text-sm text-gray-600">Analyse de la distribution des achats</p>
-              </div>
-              <div className="text-right">
-                <div className="text-2xl font-bold text-gray-900">{globalStats.totalPurchases.toLocaleString()}</div>
-                <div className="text-sm text-gray-600">MAD Total</div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Graphique donut simulé */}
-              <div className="space-y-3">
-                {supplierDistributionData.map((supplier, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                    <div className="flex items-center space-x-3">
-                      <div 
-                        className="w-4 h-4 rounded-full"
-                        style={{ backgroundColor: supplier.color }}
-                      />
-                      <div>
-                        <p className="font-medium text-gray-900">{supplier.name}</p>
-                        <p className="text-sm text-gray-600">{supplier.percentage.toFixed(1)}%</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-lg font-bold text-gray-900">
-                        {supplier.value.toLocaleString()} MAD
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Analyse */}
-              <div className="space-y-4">
-                <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-                  <h4 className="font-medium text-orange-900 mb-2">🎯 Concentration des Achats</h4>
-                  <div className="text-sm text-orange-800">
-                    <p>Top 3 fournisseurs: {supplierDistributionData.slice(0, 3).reduce((sum, s) => sum + s.percentage, 0).toFixed(1)}%</p>
-                    <p>Fournisseur principal: {supplierDistributionData[0]?.name || 'N/A'}</p>
-                  </div>
-                </div>
-
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <h4 className="font-medium text-blue-900 mb-2">📊 Diversification</h4>
-                  <div className="text-sm text-blue-800">
-                    <p>Nombre de fournisseurs actifs: {supplierDistributionData.length}</p>
-                    <p>Montant moyen par fournisseur: {supplierDistributionData.length > 0 ? (globalStats.totalPurchases / supplierDistributionData.length).toFixed(0) : '0'} MAD</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <SupplierDistributionChart 
+          data={supplierDistributionData}
+          totalPurchases={globalStats.totalPurchases}
+        />
       )}
 
       {activeTab === 'evolution' && (
-        <div className="space-y-6">
-          {/* Graphique d'évolution */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Évolution Commandes vs Paiements</h3>
-                <p className="text-sm text-gray-600">Analyse mensuelle sur 12 mois</p>
-              </div>
-              <div className="flex items-center space-x-2 text-orange-600">
-                <TrendingUp className="w-5 h-5" />
-                <span className="text-sm font-medium">Tendance</span>
-              </div>
-            </div>
+        <SupplierEvolutionChart data={monthlyEvolutionData} />
+      )}
 
-            {/* Graphique linéaire simulé */}
-            <div className="space-y-4">
-              {monthlyEvolutionData.map((data, index) => (
-                <div key={index} className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium text-gray-700">{data.month}</span>
-                    <div className="flex items-center space-x-4 text-xs">
-                      <span className="text-blue-600">Commandes: {data.orders.toLocaleString()}</span>
-                      <span className="text-green-600">Paiements: {data.payments.toLocaleString()}</span>
-                      <span className={`font-bold ${data.balance > 0 ? 'text-red-600' : data.balance < 0 ? 'text-green-600' : 'text-gray-600'}`}>
-                        Balance: {data.balance.toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="relative h-12 bg-gray-100 rounded-lg overflow-hidden">
-                    {/* Barre commandes */}
-                    <div 
-                      className="absolute bottom-0 left-0 bg-gradient-to-t from-blue-400 to-blue-500 rounded-lg transition-all duration-700 ease-out"
-                      style={{ 
-                        height: `${Math.max(...monthlyEvolutionData.map(d => Math.max(d.orders, d.payments))) > 0 ? (data.orders / Math.max(...monthlyEvolutionData.map(d => Math.max(d.orders, d.payments)))) * 100 : 0}%`,
-                        width: '45%'
-                      }}
-                    />
-                    
-                    {/* Barre paiements */}
-                    <div 
-                      className="absolute bottom-0 right-0 bg-gradient-to-t from-green-400 to-green-500 rounded-lg transition-all duration-700 ease-out"
-                      style={{ 
-                        height: `${Math.max(...monthlyEvolutionData.map(d => Math.max(d.orders, d.payments))) > 0 ? (data.payments / Math.max(...monthlyEvolutionData.map(d => Math.max(d.orders, d.payments)))) * 100 : 0}%`,
-                        width: '45%',
-                        animationDelay: '0.2s'
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Légende */}
-            <div className="flex items-center justify-center space-x-6 mt-6 pt-4 border-t border-gray-200">
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-blue-500 rounded"></div>
-                <span className="text-xs text-gray-600">Commandes</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-gradient-to-r from-green-400 to-green-500 rounded"></div>
-                <span className="text-xs text-gray-600">Paiements</span>
-              </div>
-            </div>
-          </div>
-        </div>
+      {activeTab === 'heatmap' && (
+        <SupplierHeatmapChart 
+          suppliers={suppliers}
+          purchaseOrders={purchaseOrders}
+          supplierPayments={supplierPayments}
+        />
       )}
 
       {activeTab === 'analysis' && (
         <div className="space-y-6">
-          {/* Analyse avancée */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Score de Fiabilité Fournisseurs</h3>
-              <div className="space-y-4">
-                {topSuppliersData.slice(0, 5).map((supplier, index) => {
-                  // Calcul du score de fiabilité (basé sur régularité et volume)
-                  const reliabilityScore = Math.min(100, 
-                    (supplier.ordersCount * 10) + 
-                    (supplier.totalPurchases / 1000) + 
-                    (supplier.balance <= 0 ? 20 : -10)
-                  );
-                  
-                  return (
-                    <div key={supplier.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm ${
-                          reliabilityScore >= 80 ? 'bg-green-500' :
-                          reliabilityScore >= 60 ? 'bg-yellow-500' : 'bg-red-500'
-                        }`}>
-                          {index + 1}
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-900">{supplier.name}</p>
-                          <p className="text-xs text-gray-500">{supplier.ordersCount} commandes</p>
-                        </div>
-                      </div>
-                      
-                      <div className="text-right">
-                        <div className={`text-lg font-bold ${
-                          reliabilityScore >= 80 ? 'text-green-600' :
-                          reliabilityScore >= 60 ? 'text-yellow-600' : 'text-red-600'
-                        }`}>
-                          {reliabilityScore.toFixed(0)}/100
-                        </div>
-                        <div className="text-xs text-gray-500">Score fiabilité</div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Analyse des Délais</h3>
-              <div className="space-y-4">
-                <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <div className="text-2xl font-bold text-blue-600">
-                    {globalStats.averagePaymentDelay.toFixed(0)}
-                  </div>
-                  <div className="text-sm text-blue-700">Jours délai moyen</div>
-                </div>
-
-                <div className="space-y-3">
-                  {suppliers.map(supplier => {
-                    const isLatePayment = supplier.paymentTerms < globalStats.averagePaymentDelay;
-                    return (
-                      <div key={supplier.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <span className="text-sm font-medium text-gray-900">{supplier.name}</span>
-                        <div className="flex items-center space-x-2">
-                          <span className="text-sm text-gray-600">{supplier.paymentTerms} jours</span>
-                          {isLatePayment ? (
-                            <AlertTriangle className="w-4 h-4 text-red-500" />
-                          ) : (
-                            <CheckCircle className="w-4 h-4 text-green-500" />
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          </div>
+          <SupplierReliabilityChart 
+            suppliers={topSuppliersData}
+            averagePaymentDelay={globalStats.averagePaymentDelay}
+          />
 
           {/* Alertes et recommandations */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">

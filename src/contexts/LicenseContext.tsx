@@ -3,6 +3,7 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { useAuth } from './AuthContext';
 import { useData } from './DataContext';
+import { useSupplier } from './SupplierContext';
 
 export type LicenseType = 'free' | 'pro';
 
@@ -53,26 +54,10 @@ const LicenseContext = createContext<LicenseContextType | undefined>(undefined);
 export function LicenseProvider({ children }: { children: ReactNode }) {
   const { user, upgradeSubscription } = useAuth();
   const { invoices, clients, products, quotes } = useData();
+  const { suppliers } = useSupplier();
   const [licenseType, setLicenseType] = useState<LicenseType>('free');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [upgradeExpiryDate, setUpgradeExpiryDate] = useState<string | null>(null);
-  
-  // Import conditionnel pour éviter les dépendances circulaires
-  const [suppliers, setSuppliers] = useState<any[]>([]);
-  
-  // Écouter les changements des fournisseurs
-  React.useEffect(() => {
-    // Accès direct au contexte fournisseur si disponible
-    try {
-      const supplierContext = React.useContext(require('./SupplierContext').SupplierContext);
-      if (supplierContext) {
-        setSuppliers(supplierContext.suppliers);
-      }
-    } catch (error) {
-      // Fallback si le contexte n'est pas disponible
-      setSuppliers([]);
-    }
-  }, []);
 
   // Initialiser le type de licence depuis les données utilisateur
   useEffect(() => {

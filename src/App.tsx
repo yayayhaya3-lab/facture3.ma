@@ -114,13 +114,13 @@ function App() {
     <BrowserRouter>
       <LanguageProvider>
         <AuthProvider>
-          <DataProvider>
-            <LicenseProvider>
-              <SupplierProvider>
+          <SupplierProvider>
+            <DataProvider>
+              <LicenseProvider>
                 <AppContent />
-              </SupplierProvider>
-            </LicenseProvider>
-          </DataProvider>
+              </LicenseProvider>
+            </DataProvider>
+          </SupplierProvider>
         </AuthProvider>
       </LanguageProvider>
     </BrowserRouter>

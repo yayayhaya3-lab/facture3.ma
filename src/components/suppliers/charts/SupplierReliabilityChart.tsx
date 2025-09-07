@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Target, Award, AlertTriangle, CheckCircle, TrendingUp, Users } from 'lucide-react';
+import { Target, Award, AlertTriangle, CheckCircle, TrendingUp, Users,Cell  } from 'lucide-react';
 
 interface ReliabilitySupplier {
   id: string;

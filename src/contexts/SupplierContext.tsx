@@ -112,6 +112,9 @@ interface SupplierContextType {
 
 const SupplierContext = createContext<SupplierContextType | undefined>(undefined);
 
+// Export du contexte pour utilisation dans LicenseContext
+export { SupplierContext };
+
 export function SupplierProvider({ children }: { children: ReactNode }) {
   const { user, isAuthenticated } = useAuth();
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);

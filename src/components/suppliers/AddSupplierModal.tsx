@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useSupplier } from '../../contexts/SupplierContext';
+import { useLicense } from '../../contexts/LicenseContext';
 import Modal from '../common/Modal';
 
 interface AddSupplierModalProps {
@@ -9,6 +10,7 @@ interface AddSupplierModalProps {
 
 export default function AddSupplierModal({ isOpen, onClose }: AddSupplierModalProps) {
   const { addSupplier } = useSupplier();
+  const { checkLimit } = useLicense();
   const [formData, setFormData] = useState({
     name: '',
     ice: '',
@@ -22,6 +24,11 @@ export default function AddSupplierModal({ isOpen, onClose }: AddSupplierModalPr
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!checkLimit('suppliers')) {
+      alert('🚨 Vous avez atteint la limite de 10 fournisseurs de la version gratuite. Passez à la version Pro pour continuer.');
+      return;
+    }
     
     if (!formData.name || !formData.ice) {
       alert('Le nom et l\'ICE sont obligatoires');

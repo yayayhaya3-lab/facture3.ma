@@ -311,10 +311,10 @@ export default function SupplierReliabilityChart({ suppliers, averagePaymentDela
                 <span>Recommandations</span>
               </h5>
               <div className="text-sm text-orange-800 space-y-2">
-                <div className="flex items-start space-x-2">
-                  <span className="text-green-600">✓</span>
-                  <span>Privilégiez les fournisseurs avec score > 80</span>
-                </div>
+               <div className="flex items-start space-x-2">
+  <span className="text-green-600">✓</span>
+  <span>Privilégiez les fournisseurs avec score &gt; 80</span>
+</div>
                 <div className="flex items-start space-x-2">
                   <span className="text-blue-600">•</span>
                   <span>Négociez des délais plus courts avec les gros volumes</span>

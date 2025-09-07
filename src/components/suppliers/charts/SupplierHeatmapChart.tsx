@@ -346,7 +346,7 @@ export default function SupplierHeatmapChart({ suppliers, purchaseOrders, suppli
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
               <h5 className="font-medium text-amber-900 mb-2">⚠️ Points d'Attention</h5>
               <div className="text-sm text-amber-800 space-y-1">
-                <p>• Diversifiez vos fournisseurs si concentration > 50%</p>
+                <p>• Diversifiez vos fournisseurs si concentration &gt; 50%</p>
                 <p>• Négociez les prix avec vos fournisseurs principaux</p>
                 <p>• Planifiez les achats selon la saisonnalité</p>
               </div>

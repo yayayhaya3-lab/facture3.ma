@@ -11,7 +11,6 @@ import {
   FileText,
   Search,
   Edit,
-  Trash2,
   Download,
   Filter,
   LayoutDashboard,

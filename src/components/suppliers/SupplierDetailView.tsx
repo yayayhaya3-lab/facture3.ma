@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
 import { useSupplier, Supplier } from '../../contexts/SupplierContext';
+import AddPurchaseOrderModal from './AddPurchaseOrderModal';
+import EditPurchaseOrderModal from './EditPurchaseOrderModal';
+import AddSupplierPaymentModal from './AddSupplierPaymentModal';
+import EditSupplierPaymentModal from './EditSupplierPaymentModal';
 import { 
   Building2, 
   Phone, 
@@ -16,7 +20,10 @@ import {
   Target,
   ArrowLeft,
   TrendingUp,
-  TrendingDown
+  TrendingDown,
+  Plus,
+  Edit,
+  Trash2
 } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 
@@ -29,10 +36,16 @@ export default function SupplierDetailView({ supplier, onBack }: SupplierDetailV
   const { 
     purchaseOrders, 
     supplierPayments, 
-    getSupplierStats 
+    getSupplierStats,
+    deletePurchaseOrder,
+    deleteSupplierPayment
   } = useSupplier();
   
   const [activeTab, setActiveTab] = useState('orders');
+  const [isAddOrderModalOpen, setIsAddOrderModalOpen] = useState(false);
+  const [isAddPaymentModalOpen, setIsAddPaymentModalOpen] = useState(false);
+  const [editingOrder, setEditingOrder] = useState<string | null>(null);
+  const [editingPayment, setEditingPayment] = useState<string | null>(null);
   
   const stats = getSupplierStats(supplier.id);
   const supplierOrders = purchaseOrders.filter(order => order.supplierId === supplier.id);
@@ -88,6 +101,18 @@ export default function SupplierDetailView({ supplier, onBack }: SupplierDetailV
         {badge.label}
       </span>
     );
+  };
+
+  const handleDeleteOrder = (id: string) => {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer cette commande ?')) {
+      deletePurchaseOrder(id);
+    }
+  };
+
+  const handleDeletePayment = (id: string) => {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce paiement ?')) {
+      deleteSupplierPayment(id);
+    }
   };
 
   const handleExportPDF = () => {
@@ -382,7 +407,16 @@ export default function SupplierDetailView({ supplier, onBack }: SupplierDetailV
       {activeTab === 'orders' && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200">
           <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900">Commandes d'Achat</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">Commandes d'Achat</h3>
+              <button
+                onClick={() => setIsAddOrderModalOpen(true)}
+                className="inline-flex items-center space-x-2 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white px-4 py-2 rounded-lg transition-all duration-200"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Nouvelle Commande</span>
+              </button>
+            </div>
           </div>
           
           <div className="overflow-x-auto">
@@ -409,6 +443,9 @@ export default function SupplierDetailView({ supplier, onBack }: SupplierDetailV
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Statut
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
                   </th>
                 </tr>
               </thead>
@@ -441,6 +478,24 @@ export default function SupplierDetailView({ supplier, onBack }: SupplierDetailV
                     <td className="px-6 py-4 whitespace-nowrap">
                       {getOrderStatusBadge(order.status)}
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <div className="flex items-center space-x-3">
+                        <button
+                          onClick={() => setEditingOrder(order.id)}
+                          className="text-amber-600 hover:text-amber-700 transition-colors"
+                          title="Modifier"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteOrder(order.id)}
+                          className="text-red-600 hover:text-red-700 transition-colors"
+                          title="Supprimer"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -459,7 +514,16 @@ export default function SupplierDetailView({ supplier, onBack }: SupplierDetailV
       {activeTab === 'payments' && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200">
           <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900">Historique des Paiements</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">Historique des Paiements</h3>
+              <button
+                onClick={() => setIsAddPaymentModalOpen(true)}
+                className="inline-flex items-center space-x-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-4 py-2 rounded-lg transition-all duration-200"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Nouveau Paiement</span>
+              </button>
+            </div>
           </div>
           
           <div className="overflow-x-auto">
@@ -481,6 +545,9 @@ export default function SupplierDetailView({ supplier, onBack }: SupplierDetailV
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Description
                   </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -500,6 +567,24 @@ export default function SupplierDetailView({ supplier, onBack }: SupplierDetailV
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {payment.description || '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <div className="flex items-center space-x-3">
+                        <button
+                          onClick={() => setEditingPayment(payment.id)}
+                          className="text-amber-600 hover:text-amber-700 transition-colors"
+                          title="Modifier"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeletePayment(payment.id)}
+                          className="text-red-600 hover:text-red-700 transition-colors"
+                          title="Supprimer"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -654,6 +739,33 @@ export default function SupplierDetailView({ supplier, onBack }: SupplierDetailV
             </div>
           </div>
         </div>
+      )}
+
+      {/* Modals */}
+      <AddPurchaseOrderModal 
+        isOpen={isAddOrderModalOpen} 
+        onClose={() => setIsAddOrderModalOpen(false)} 
+      />
+
+      {editingOrder && (
+        <EditPurchaseOrderModal
+          isOpen={!!editingOrder}
+          onClose={() => setEditingOrder(null)}
+          order={purchaseOrders.find(order => order.id === editingOrder)!}
+        />
+      )}
+
+      <AddSupplierPaymentModal 
+        isOpen={isAddPaymentModalOpen} 
+        onClose={() => setIsAddPaymentModalOpen(false)} 
+      />
+
+      {editingPayment && (
+        <EditSupplierPaymentModal
+          isOpen={!!editingPayment}
+          onClose={() => setEditingPayment(null)}
+          payment={supplierPayments.find(payment => payment.id === editingPayment)!}
+        />
       )}
     </div>
   );

@@ -104,6 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return null;
     }
   };
+
   const checkSubscriptionExpiry = async (userId: string, userData: any) => {
     if (userData.subscription === 'pro' && userData.expiryDate) {
       const currentDate = new Date();
@@ -253,9 +254,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         return false;
       }
-      
+
       // Sinon, essayer la connexion Firebase normale (admin)
-    try {
       await signInWithEmailAndPassword(auth, email, password);
       return true;
     } catch (error) {
@@ -353,6 +353,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw error;
     }
   };
+
   const checkSubscriptionExpiryManual = async (): Promise<void> => {
     if (!user) return;
     
@@ -362,10 +363,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const userData = userDoc.data();
         await checkSubscriptionExpiry(user.id, userData);
       }
-    } catch (error) {
-      console.error('Erreur de connexion:', error);
-      return false;
-    }
     } catch (error) {
       console.error('Erreur lors de la vérification de l\'expiration:', error);
     }

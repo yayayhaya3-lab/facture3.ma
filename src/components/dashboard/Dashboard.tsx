@@ -20,6 +20,15 @@ export default function Dashboard() {
 
   const hasAnyData = invoices.length > 0 || clients.length > 0 || products.length > 0;
 
+  // Message de bienvenue personnalisé
+  const getWelcomeMessage = () => {
+    if (user?.isAdmin) {
+      return `Bienvenue ${user.name} ! Vous êtes connecté en tant qu'administrateur.`;
+    } else {
+      const permissionCount = user?.permissions ? Object.values(user.permissions).filter(Boolean).length : 0;
+      return `Bienvenue ${user?.name} ! Vous avez accès à ${permissionCount} section${permissionCount > 1 ? 's' : ''}.`;
+    }
+  };
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -35,6 +44,18 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Message de bienvenue personnalisé */}
+      <div className={`rounded-xl border p-4 ${
+        user?.isAdmin 
+          ? 'bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200' 
+          : 'bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200'
+      }`}>
+        <p className={`text-sm font-medium ${
+          user?.isAdmin ? 'text-indigo-800' : 'text-blue-800'
+        }`}>
+          {getWelcomeMessage()}
+        </p>
+      </div>
       <StatsCards />
 
       {!hasAnyData && (

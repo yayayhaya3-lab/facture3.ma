@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { DataProvider } from './contexts/DataContext';
 import { LicenseProvider } from './contexts/LicenseContext';
+import { UserManagementProvider } from './contexts/UserManagementContext';
 import HomePage from './components/home/HomePage';
 import Login from './components/auth/Login';
 import Dashboard from './components/dashboard/Dashboard';
@@ -28,6 +29,7 @@ import StockManagement from './components/stock/StockManagement';
 import HRManagement from './components/hr/HRManagement';
 import SupplierManagement from './components/suppliers/SupplierManagement';
 import SuppliersSection from './components/suppliers/SuppliersSection';
+import AccountManagement from './components/account/AccountManagement';
 import { SupplierProvider } from './contexts/SupplierContext';
 
 function AppContent() {
@@ -74,6 +76,7 @@ function AppContent() {
             <Route path="/stock-management" element={<StockManagement />} />
             <Route path="/supplier-management" element={<SupplierManagement />} />
             <Route path="/hr-management" element={<HRManagement />} />
+            <Route path="/account-management" element={<AccountManagement />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
@@ -114,13 +117,15 @@ function App() {
     <BrowserRouter>
       <LanguageProvider>
         <AuthProvider>
-          <SupplierProvider>
-            <DataProvider>
-              <LicenseProvider>
-                <AppContent />
-              </LicenseProvider>
-            </DataProvider>
-          </SupplierProvider>
+          <UserManagementProvider>
+            <SupplierProvider>
+              <DataProvider>
+                <LicenseProvider>
+                  <AppContent />
+                </LicenseProvider>
+              </DataProvider>
+            </SupplierProvider>
+          </UserManagementProvider>
         </AuthProvider>
       </LanguageProvider>
     </BrowserRouter>

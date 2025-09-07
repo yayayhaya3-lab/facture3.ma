@@ -6,8 +6,9 @@ import {
   signOut,
   onAuthStateChanged
 } from 'firebase/auth';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, query, collection, where, getDocs } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
+import { ManagedUser } from './UserManagementContext';
 
 interface Company {
   name: string;
@@ -36,7 +37,21 @@ interface User {
   id: string;
   name: string;
   email: string;
-  role: 'admin' | 'manager' | 'cashier';
+  role: 'admin' | 'user';
+  isAdmin: boolean;
+  permissions?: {
+    dashboard: boolean;
+    invoices: boolean;
+    quotes: boolean;
+    clients: boolean;
+    products: boolean;
+    suppliers: boolean;
+    stockManagement: boolean;
+    supplierManagement: boolean;
+    hrManagement: boolean;
+    reports: boolean;
+    settings: boolean;
+  };
   company: Company;
 }
 
@@ -65,6 +80,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [showExpiryAlert, setShowExpiryAlert] = useState(false);
   const [expiredDate, setExpiredDate] = useState<string | null>(null);
 
+  // Fonction pour vérifier si un utilisateur géré existe
+  const checkManagedUser = async (email: string, password: string): Promise<ManagedUser | null> => {
+    try {
+      const managedUsersQuery = query(
+        collection(db, 'managedUsers'),
+        where('email', '==', email),
+        where('password', '==', password),
+        where('status', '==', 'active')
+      );
+      
+      const snapshot = await getDocs(managedUsersQuery);
+      if (!snapshot.empty) {
+        const userData = snapshot.docs[0].data() as ManagedUser;
+        return {
+          id: snapshot.docs[0].id,
+          ...userData
+        };
+      }
+      return null;
+    } catch (error) {
+      console.error('Erreur lors de la vérification de l\'utilisateur géré:', error);
+      return null;
+    }
+  };
   const checkSubscriptionExpiry = async (userId: string, userData: any) => {
     if (userData.subscription === 'pro' && userData.expiryDate) {
       const currentDate = new Date();
@@ -121,6 +160,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               name: userData.ownerName || firebaseUser.email?.split('@')[0] || 'Utilisateur',
               email: firebaseUser.email || '',
               role: 'admin',
+              isAdmin: true,
               company: {
                 name: userData.name,
                 ice: userData.ice,
@@ -131,7 +171,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 phone: userData.phone,
                 logo: userData.logo,
                 email: userData.email,
-                signature: userData.signature || "",   // 🔹 AJOUT ICI
+                signature: userData.signature || "",
                 patente: userData.patente,
                 website: userData.website,
                 invoiceNumberingFormat: userData.invoiceNumberingFormat,
@@ -162,6 +202,59 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
+    try {
+      // D'abord, vérifier si c'est un utilisateur géré
+      const managedUser = await checkManagedUser(email, password);
+      
+      if (managedUser) {
+        // C'est un utilisateur géré, récupérer les données de l'entreprise
+        const companyDoc = await getDoc(doc(db, 'entreprises', managedUser.entrepriseId));
+        if (companyDoc.exists()) {
+          const companyData = companyDoc.data();
+          
+          // Mettre à jour la dernière connexion
+          await updateDoc(doc(db, 'managedUsers', managedUser.id), {
+            lastLogin: new Date().toISOString()
+          });
+          
+          // Créer l'objet utilisateur avec les permissions
+          setUser({
+            id: managedUser.id,
+            name: managedUser.name,
+            email: managedUser.email,
+            role: 'user',
+            isAdmin: false,
+            permissions: managedUser.permissions,
+            company: {
+              name: companyData.name,
+              ice: companyData.ice,
+              if: companyData.if,
+              rc: companyData.rc,
+              cnss: companyData.cnss,
+              address: companyData.address,
+              phone: companyData.phone,
+              logo: companyData.logo,
+              email: companyData.email,
+              signature: companyData.signature || "",
+              patente: companyData.patente,
+              website: companyData.website,
+              invoiceNumberingFormat: companyData.invoiceNumberingFormat,
+              invoicePrefix: companyData.invoicePrefix,
+              invoiceCounter: companyData.invoiceCounter,
+              lastInvoiceYear: companyData.lastInvoiceYear,
+              defaultTemplate: companyData.defaultTemplate || 'template1',
+              subscription: companyData.subscription || 'free',
+              subscriptionDate: companyData.subscriptionDate,
+              expiryDate: companyData.expiryDate
+            }
+          });
+          
+          return true;
+        }
+        return false;
+      }
+      
+      // Sinon, essayer la connexion Firebase normale (admin)
     try {
       await signInWithEmailAndPassword(auth, email, password);
       return true;
@@ -269,6 +362,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const userData = userDoc.data();
         await checkSubscriptionExpiry(user.id, userData);
       }
+    } catch (error) {
+      console.error('Erreur de connexion:', error);
+      return false;
+    }
     } catch (error) {
       console.error('Erreur lors de la vérification de l\'expiration:', error);
     }

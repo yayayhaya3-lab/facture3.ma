@@ -16,7 +16,8 @@ import {
   FileCheck,
   TrendingUp,
   UserCheck,
-  Truck
+  Truck,
+  Shield
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -37,26 +38,40 @@ export default function Sidebar({ open, setOpen, onUpgrade }: SidebarProps) {
   // Vérifier si l'activation est en cours
   const isActivationPending = localStorage.getItem('proActivationPending') === 'true';
 
+  // Fonction pour vérifier les permissions
+  const hasPermission = (permission: string) => {
+    if (user?.isAdmin) return true; // Admin a accès à tout
+    if (!user?.permissions) return false;
+    return user.permissions[permission as keyof typeof user.permissions] || false;
+  };
   const handleProFeatureClick = (e: React.MouseEvent, path: string) => {
     if (!isProActive) {
       e.preventDefault();
       onUpgrade();
     }
   };
+
+  const handlePermissionClick = (e: React.MouseEvent, permission: string) => {
+    if (!hasPermission(permission)) {
+      e.preventDefault();
+      alert('Vous n\'avez pas accès à cette section. Contactez votre administrateur.');
+    }
+  };
+
   const menuItems = [
-    { icon: LayoutDashboard, label: t('dashboard'), path: '/dashboard' },
-    { icon: FileText, label: t('invoices'), path: '/invoices' },
-    { icon: FileCheck, label: 'Devis', path: '/quotes' },
-    { icon: Users, label: t('clients'), path: '/clients' },
-    { icon: Package, label: t('products'), path: '/products' },
-     { icon: Truck, label: t('Fournisseurs'), path: '/suppliers' },
+    { icon: LayoutDashboard, label: t('dashboard'), path: '/dashboard', permission: 'dashboard' },
+    { icon: FileText, label: t('invoices'), path: '/invoices', permission: 'invoices' },
+    { icon: FileCheck, label: 'Devis', path: '/quotes', permission: 'quotes' },
+    { icon: Users, label: t('clients'), path: '/clients', permission: 'clients' },
+    { icon: Package, label: t('products'), path: '/products', permission: 'products' },
+    { icon: Truck, label: t('Fournisseurs'), path: '/suppliers', permission: 'suppliers' },
     
-   
      { 
       icon: Truck, 
       label: 'Gestion Fournisseurs', 
       path: '/supplier-management',
-      isPro: true 
+      isPro: true,
+      permission: 'supplierManagement'
     }, 
 
     
@@ -64,24 +79,34 @@ export default function Sidebar({ open, setOpen, onUpgrade }: SidebarProps) {
       icon: TrendingUp, 
       label: 'Gestion de Stock', 
       path: '/stock-management',
-      isPro: true 
+      isPro: true,
+      permission: 'stockManagement'
     },
       { 
       icon: BarChart3, 
       label: 'Gestion financière', 
       path: '/reports',
-      isPro: true 
+      isPro: true,
+      permission: 'reports'
     },
     { 
       icon: UserCheck, 
       label: 'Gestion Humaine', 
       path: '/hr-management',
-      isPro: true 
+      isPro: true,
+      permission: 'hrManagement'
     },
-   
-  
     
-    { icon: Settings, label: t('settings'), path: '/settings' },
+    // Gestion de compte (seulement pour les admins Pro)
+    ...(user?.isAdmin && isProActive ? [{
+      icon: Shield,
+      label: 'Gestion de Compte',
+      path: '/account-management',
+      isPro: true,
+      permission: 'settings'
+    }] : []),
+    
+    { icon: Settings, label: t('settings'), path: '/settings', permission: 'settings' },
   ];
 
   return (
@@ -119,10 +144,11 @@ export default function Sidebar({ open, setOpen, onUpgrade }: SidebarProps) {
               const Icon = item.icon;
               const isProFeature = item.isPro;
               const canAccess = !isProFeature || isProActive;
+              const hasAccess = hasPermission(item.permission || '');
               
               return (
                 <li key={item.path}>
-                  {canAccess ? (
+                  {canAccess && hasAccess ? (
                     <NavLink
                       to={item.path}
                       className={({ isActive }) =>
@@ -145,7 +171,7 @@ export default function Sidebar({ open, setOpen, onUpgrade }: SidebarProps) {
                         </div>
                       )}
                     </NavLink>
-                  ) : (
+                  ) : !canAccess ? (
                     <button
                       onClick={(e) => handleProFeatureClick(e, item.path)}
                       className="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-200 group text-gray-500 hover:bg-red-50 hover:text-red-600 cursor-pointer"
@@ -160,6 +186,21 @@ export default function Sidebar({ open, setOpen, onUpgrade }: SidebarProps) {
                         </div>
                       )}
                     </button>
+                  ) : (
+                    <button
+                      onClick={(e) => handlePermissionClick(e, item.permission || '')}
+                      className="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-200 group text-gray-400 hover:bg-gray-50 cursor-not-allowed"
+                    >
+                      <Icon className="w-5 h-5 flex-shrink-0" />
+                      {open && (
+                        <div className="flex items-center space-x-2">
+                          <span className="font-medium">{item.label}</span>
+                          <span className="text-xs bg-gray-300 text-gray-600 px-1.5 py-0.5 rounded-full font-bold">
+                            🚫
+                          </span>
+                        </div>
+                      )}
+                    </button>
                   )}
                 </li>
               );
@@ -169,6 +210,17 @@ export default function Sidebar({ open, setOpen, onUpgrade }: SidebarProps) {
 
         {/* License Version */}
         <div className="absolute bottom-6 left-3 right-3">
+          {/* Indicateur de rôle */}
+          {user && (
+            <div className={`mb-3 p-2 rounded-lg text-center text-xs ${
+              user.isAdmin 
+                ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white' 
+                : 'bg-gradient-to-r from-blue-500 to-cyan-600 text-white'
+            }`}>
+              {user.isAdmin ? '👑 Administrateur' : '👤 Utilisateur'}
+            </div>
+          )}
+          
           {isProActive ? (
             <div className="bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg p-3 text-white text-center">
               <div className="text-xs font-medium mb-1">👑 Pro</div>
@@ -186,13 +238,17 @@ export default function Sidebar({ open, setOpen, onUpgrade }: SidebarProps) {
               <div className="text-xs font-medium mb-1">⏳ Activation en cours</div>
               <div className="text-xs opacity-90">Traitement sous 2h</div>
             </div>
-          ) : (
+          ) : user?.isAdmin ? (
             <button
               onClick={onUpgrade}
               className="w-full bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 rounded-lg p-3 text-white text-center transition-all duration-200 hover:shadow-lg"
             >
               <div className="text-xs font-medium">🆓 Free - Acheter version Pro</div>
             </button>
+          ) : (
+            <div className="bg-gradient-to-r from-gray-400 to-gray-500 rounded-lg p-3 text-white text-center">
+              <div className="text-xs font-medium">👤 Compte Utilisateur</div>
+            </div>
           )}
           
         </div>

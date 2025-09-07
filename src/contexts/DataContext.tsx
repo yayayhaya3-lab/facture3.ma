@@ -29,6 +29,7 @@ export interface Client {
 export interface Product {
   id: string;
   name: string;
+  sku: string;
   category: string;
   purchasePrice: number;
   salePrice: number;
@@ -190,6 +191,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [overtimes, setOvertimes] = useState<Overtime[]>([]);
   const [leaves, setLeaves] = useState<Leave[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Générer un SKU automatique pour les produits
+  const generateSKU = (name: string, category: string) => {
+    const categoryPrefix = category ? category.substring(0, 3).toUpperCase() : 'PRD';
+    const namePrefix = name.substring(0, 3).toUpperCase();
+    const timestamp = Date.now().toString().slice(-4);
+    return `${categoryPrefix}-${namePrefix}-${timestamp}`;
+  };
 
   // Écouter les changements en temps réel
   useEffect(() => {
@@ -405,8 +414,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
     if (!user) return;
     
     try {
+      // Générer un SKU automatique si pas fourni
+      const sku = generateSKU(productData.name, productData.category);
+      
       await addDoc(collection(db, 'products'), {
         ...productData,
+        sku,
         entrepriseId: user.id,
         createdAt: new Date().toISOString()
       });

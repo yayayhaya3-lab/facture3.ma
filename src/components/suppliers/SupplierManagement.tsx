@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSupplier } from '../../contexts/SupplierContext';
+import { Plus, Trash2 } from 'lucide-react';
 import { 
   Truck, 
   Crown,
@@ -47,10 +48,28 @@ export default function SupplierManagement() {
   const [isAddPaymentModalOpen, setIsAddPaymentModalOpen] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<string | null>(null);
 
-  // Vérifier l'accès PRO
+  // Vérifier l'accès PRO - Permettre l'accès si l'utilisateur a une licence Pro active
   const isProActive = user?.company.subscription === 'pro' && user?.company.expiryDate && 
     new Date(user.company.expiryDate) > new Date();
 
+  // Filtrer les fournisseurs
+  const filteredSuppliers = selectedSupplier === 'all' 
+    ? suppliers 
+    : suppliers.filter(supplier => supplier.id === selectedSupplier);
+
+  const searchFilteredSuppliers = filteredSuppliers.filter(supplier =>
+    supplier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    supplier.ice.includes(searchTerm) ||
+    supplier.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Calculer les statistiques globales
+  const totalSuppliers = suppliers.length;
+  const totalPurchases = purchaseOrders.reduce((sum, order) => sum + order.totalTTC, 0);
+  const totalPayments = supplierPayments.reduce((sum, payment) => sum + payment.amount, 0);
+  const totalBalance = totalPurchases - totalPayments;
+
+  // Si pas d'accès Pro, afficher le message de restriction
   if (!isProActive) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -75,23 +94,6 @@ export default function SupplierManagement() {
       </div>
     );
   }
-
-  // Filtrer les fournisseurs
-  const filteredSuppliers = selectedSupplier === 'all' 
-    ? suppliers 
-    : suppliers.filter(supplier => supplier.id === selectedSupplier);
-
-  const searchFilteredSuppliers = filteredSuppliers.filter(supplier =>
-    supplier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    supplier.ice.includes(searchTerm) ||
-    supplier.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Calculer les statistiques globales
-  const totalSuppliers = suppliers.length;
-  const totalPurchases = purchaseOrders.reduce((sum, order) => sum + order.totalTTC, 0);
-  const totalPayments = supplierPayments.reduce((sum, payment) => sum + payment.amount, 0);
-  const totalBalance = totalPurchases - totalPayments;
 
   const handleDeleteSupplier = (id: string) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer ce fournisseur ?')) {

@@ -58,7 +58,7 @@ export default function Sidebar({ open, setOpen, onUpgrade }: SidebarProps) {
     },
       { 
       icon: BarChart3, 
-      label: t('Gestion financière'), 
+      label: 'Gestion financière', 
       path: '/reports',
       isPro: true 
     },

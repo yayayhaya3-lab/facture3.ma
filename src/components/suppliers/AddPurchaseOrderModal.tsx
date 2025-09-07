@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useSupplier } from '../../contexts/SupplierContext';
 import Modal from '../common/Modal';
+import { Plus, Trash2 } from 'lucide-react';
 
 interface AddPurchaseOrderModalProps {
   isOpen: boolean;

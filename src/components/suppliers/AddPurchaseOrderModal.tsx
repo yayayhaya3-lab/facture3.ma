@@ -248,7 +248,7 @@ export default function AddPurchaseOrderModal({ isOpen, onClose }: AddPurchaseOr
                     <input
                       type="number"
                        min="0"
-                      step="0.01"
+                      step="0.001"
                       value={item.quantity}
                       onChange={(e) => updateItem(index, 'quantity', parseFloat(e.target.value) || 0)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"

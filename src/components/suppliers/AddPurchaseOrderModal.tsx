@@ -246,7 +246,7 @@ export default function AddPurchaseOrderModal({ isOpen, onClose }: AddPurchaseOr
                       Quantité
                     </label>
                     <input
-                      type="text"
+                      type="number"
                        min="0"
                       step="0.01"
                       value={item.quantity}

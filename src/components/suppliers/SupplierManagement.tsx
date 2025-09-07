@@ -225,7 +225,6 @@ export default function SupplierManagement() {
 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'suppliers', label: 'Fournisseurs', icon: Truck },
     { id: 'orders', label: 'Commandes', icon: FileText },
     { id: 'payments', label: 'Paiements', icon: CreditCard }
   ];

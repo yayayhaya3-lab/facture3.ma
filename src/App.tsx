@@ -80,6 +80,7 @@ function AppContent() {
         </main>
       </div>
       
+      
       {showUpgradePage && (
         <UpgradePage onClose={() => setShowUpgradePage(false)} />
       )}

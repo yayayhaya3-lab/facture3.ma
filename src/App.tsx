@@ -27,6 +27,7 @@ import AdminDashboard from './components/admin/AdminDashboard';
 import StockManagement from './components/stock/StockManagement';
 import HRManagement from './components/hr/HRManagement';
 import SupplierManagement from './components/suppliers/SupplierManagement';
+import SuppliersSection from './components/suppliers/SuppliersSection';
 import { SupplierProvider } from './contexts/SupplierContext';
 
 function AppContent() {
@@ -69,6 +70,7 @@ function AppContent() {
             <Route path="/quotes/create" element={<CreateQuote />} />
             <Route path="/clients" element={<ClientsList />} />
             <Route path="/products" element={<ProductsList />} />
+            <Route path="/suppliers" element={<SuppliersSection />} />
             <Route path="/stock-management" element={<StockManagement />} />
             <Route path="/supplier-management" element={<SupplierManagement />} />
             <Route path="/hr-management" element={<HRManagement />} />

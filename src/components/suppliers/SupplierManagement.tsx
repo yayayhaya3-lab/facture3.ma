@@ -22,18 +22,24 @@ import {
 } from 'lucide-react';
 import AddSupplierModal from './AddSupplierModal';
 import EditSupplierModal from './EditSupplierModal';
+import EditPurchaseOrderModal from './EditPurchaseOrderModal';
+import EditSupplierPaymentModal from './EditSupplierPaymentModal';
 import AddPurchaseOrderModal from './AddPurchaseOrderModal';
 import AddSupplierPaymentModal from './AddSupplierPaymentModal';
 import SupplierDashboard from './SupplierDashboard';
+import { useNavigate } from 'react-router-dom';
 import html2pdf from 'html2pdf.js';
 
 export default function SupplierManagement() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { 
     suppliers, 
     purchaseOrders, 
     supplierPayments, 
     deleteSupplier, 
+    deletePurchaseOrder,
+    deleteSupplierPayment,
     getSupplierStats,
     getSupplierBalance 
   } = useSupplier();
@@ -44,6 +50,8 @@ export default function SupplierManagement() {
   const [isAddSupplierModalOpen, setIsAddSupplierModalOpen] = useState(false);
   const [isAddOrderModalOpen, setIsAddOrderModalOpen] = useState(false);
   const [isAddPaymentModalOpen, setIsAddPaymentModalOpen] = useState(false);
+  const [editingOrder, setEditingOrder] = useState<string | null>(null);
+  const [editingPayment, setEditingPayment] = useState<string | null>(null);
   const [editingSupplier, setEditingSupplier] = useState<string | null>(null);
 
   // Vérifier l'accès PRO - Permettre l'accès si l'utilisateur a une licence Pro active
@@ -99,6 +107,17 @@ export default function SupplierManagement() {
     }
   };
 
+  const handleDeleteOrder = (id: string) => {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer cette commande ?')) {
+      deletePurchaseOrder(id);
+    }
+  };
+
+  const handleDeletePayment = (id: string) => {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce paiement ?')) {
+      deleteSupplierPayment(id);
+    }
+  };
   const exportSupplierReport = () => {
     const reportContent = generateSupplierReportHTML();
     
@@ -289,12 +308,19 @@ export default function SupplierManagement() {
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold text-gray-900">Fournisseurs</h2>
             <button
-              onClick={() => setIsAddSupplierModalOpen(true)}
+              onClick={() => navigate('/suppliers')}
               className="inline-flex items-center space-x-2 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white px-4 py-2 rounded-lg transition-all duration-200"
             >
               <Plus className="w-4 h-4" />
-              <span>Nouveau Fournisseur</span>
+              <span>Ajouter un Fournisseur</span>
             </button>
+          </div>
+
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <p className="text-blue-800 text-sm">
+              💡 <strong>Information :</strong> Pour ajouter, modifier ou consulter les détails d'un fournisseur, 
+              utilisez la section dédiée "Fournisseurs" dans le menu principal.
+            </p>
           </div>
 
           {/* Search */}
@@ -474,6 +500,24 @@ export default function SupplierManagement() {
                            order.status === 'sent' ? 'Envoyé' : 'Brouillon'}
                         </span>
                       </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <div className="flex items-center space-x-3">
+                    <button
+                      onClick={() => setEditingOrder(order.id)}
+                      className="text-amber-600 hover:text-amber-700 transition-colors"
+                      title="Modifier"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteOrder(order.id)}
+                      className="text-red-600 hover:text-red-700 transition-colors"
+                      title="Supprimer"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </td>
                     </tr>
                   ))}
                 </tbody>
@@ -524,6 +568,9 @@ export default function SupplierManagement() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Référence
                     </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -553,6 +600,24 @@ export default function SupplierManagement() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {payment.reference}
                       </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <div className="flex items-center space-x-3">
+                    <button
+                      onClick={() => setEditingPayment(payment.id)}
+                      className="text-amber-600 hover:text-amber-700 transition-colors"
+                      title="Modifier"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDeletePayment(payment.id)}
+                      className="text-red-600 hover:text-red-700 transition-colors"
+                      title="Supprimer"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </td>
                     </tr>
                   ))}
                 </tbody>
@@ -569,10 +634,6 @@ export default function SupplierManagement() {
       )}
 
       {/* Modals */}
-      <AddSupplierModal 
-        isOpen={isAddSupplierModalOpen} 
-        onClose={() => setIsAddSupplierModalOpen(false)} 
-      />
 
       <AddPurchaseOrderModal 
         isOpen={isAddOrderModalOpen} 
@@ -584,13 +645,24 @@ export default function SupplierManagement() {
         onClose={() => setIsAddPaymentModalOpen(false)} 
       />
 
-      {editingSupplier && (
-        <EditSupplierModal
-          isOpen={!!editingSupplier}
-          onClose={() => setEditingSupplier(null)}
-          supplier={suppliers.find(sup => sup.id === editingSupplier)!}
+      {editingOrder && (
+        <EditPurchaseOrderModal
+          isOpen={!!editingOrder}
+          onClose={() => setEditingOrder(null)}
+          order={purchaseOrders.find(order => order.id === editingOrder)!}
+        />
+      )}
+
+      {editingPayment && (
+        <EditSupplierPaymentModal
+          isOpen={!!editingPayment}
+          onClose={() => setEditingPayment(null)}
+          payment={supplierPayments.find(payment => payment.id === editingPayment)!}
         />
       )}
     </div>
   );
 }
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>

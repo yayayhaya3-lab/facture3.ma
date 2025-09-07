@@ -98,6 +98,7 @@ interface SupplierContextType {
   addSupplierPayment: (payment: Omit<SupplierPayment, 'id' | 'createdAt' | 'entrepriseId'>) => Promise<void>;
   updateSupplierPayment: (id: string, payment: Partial<SupplierPayment>) => Promise<void>;
   deleteSupplierPayment: (id: string) => Promise<void>;
+  deletePurchaseOrder: (id: string) => Promise<void>;
   getSupplierById: (id: string) => Supplier | undefined;
   getSupplierBalance: (supplierId: string) => number;
   getSupplierStats: (supplierId: string) => {

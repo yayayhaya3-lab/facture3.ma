@@ -56,6 +56,15 @@ export default function Sidebar({ open, setOpen, onUpgrade }: SidebarProps) {
       path: '/suppliers',
       isPro: true 
     },
+
+     { 
+      icon: Truck, 
+      label: 'Gestion Fournisseurs', 
+      path: '/supplier-management',
+      isPro: true 
+    }, 
+
+    
     { 
       icon: TrendingUp, 
       label: 'Gestion de Stock', 
@@ -74,12 +83,7 @@ export default function Sidebar({ open, setOpen, onUpgrade }: SidebarProps) {
       path: '/hr-management',
       isPro: true 
     },
-    { 
-      icon: Truck, 
-      label: 'Gestion Fournisseurs', 
-      path: '/supplier-management',
-      isPro: true 
-    },
+   
   
     
     { icon: Settings, label: t('settings'), path: '/settings' },

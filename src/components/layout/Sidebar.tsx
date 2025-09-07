@@ -52,7 +52,7 @@ export default function Sidebar({ open, setOpen, onUpgrade }: SidebarProps) {
     { 
       icon: TrendingUp, 
       label: 'Gestion Fournisseur', 
-      path: '/suppliers-management',
+      path: '/supplier-management',
       isPro: true 
     },
     { 

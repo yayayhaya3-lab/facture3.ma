@@ -181,18 +181,7 @@ export default function AddPurchaseOrderModal({ isOpen, onClose }: AddPurchaseOr
             />
           </div>
           
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Date d'échéance
-            </label>
-            <input
-              type="date"
-              name="dueDate"
-              value={formData.dueDate}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-            />
-          </div>
+        
         </div>
 
         {/* Items */}
@@ -252,19 +241,21 @@ export default function AddPurchaseOrderModal({ isOpen, onClose }: AddPurchaseOr
                     />
                   </div>
                   
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Quantité
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      value={item.quantity}
-                      onChange={(e) => updateItem(index, 'quantity', parseFloat(e.target.value) || 0)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    />
-                  </div>
-                  
+                 <div>
+  <label className="block text-xs font-medium text-gray-700 mb-1">
+    Quantité
+  </label>
+  <input
+    type="text"
+    inputMode="decimal"
+    value={item.quantity}
+    onChange={(e) => {
+      const value = e.target.value.replace(",", "."); // remplacer virgule par point
+      updateItem(index, "quantity", parseFloat(value) || 0);
+    }}
+    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+  />
+</div>
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">
                       Prix unit. (MAD)

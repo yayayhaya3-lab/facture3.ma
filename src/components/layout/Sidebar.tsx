@@ -51,6 +51,12 @@ export default function Sidebar({ open, setOpen, onUpgrade }: SidebarProps) {
     { icon: Package, label: t('products'), path: '/products' },
     { 
       icon: TrendingUp, 
+      label: 'Gestion Fournisseur', 
+      path: '/supplier-management',
+      isPro: true 
+    },
+    { 
+      icon: TrendingUp, 
       label: 'Gestion de Stock', 
       path: '/stock-management',
       isPro: true 

@@ -332,4 +332,4 @@ export default function SupplierDetailModal({ isOpen, onClose, supplier }: Suppl
       </div>
     </Modal>
   );
-
+}

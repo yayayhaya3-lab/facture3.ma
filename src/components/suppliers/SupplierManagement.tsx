@@ -9,7 +9,6 @@ import {
   Package, 
   DollarSign, 
   FileText,
-  Plus,
   Search,
   Edit,
   Trash2,

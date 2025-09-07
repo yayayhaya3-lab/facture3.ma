@@ -241,7 +241,7 @@ export default function AddPurchaseOrderModal({ isOpen, onClose }: AddPurchaseOr
                     />
                   </div>
                   
-                 <div>
+          <div>
   <label className="block text-xs font-medium text-gray-700 mb-1">
     Quantité
   </label>
@@ -250,8 +250,15 @@ export default function AddPurchaseOrderModal({ isOpen, onClose }: AddPurchaseOr
     inputMode="decimal"
     value={item.quantity}
     onChange={(e) => {
-      const value = e.target.value.replace(",", "."); // remplacer virgule par point
-      updateItem(index, "quantity", parseFloat(value) || 0);
+      let value = e.target.value;
+
+      // Autoriser seulement chiffres, virgule et point
+      value = value.replace(/[^0-9.,]/g, "");
+
+      // Remplacer virgule par point pour conversion float
+      const numericValue = parseFloat(value.replace(",", "."));
+
+      updateItem(index, "quantity", isNaN(numericValue) ? 0 : numericValue);
     }}
     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
   />

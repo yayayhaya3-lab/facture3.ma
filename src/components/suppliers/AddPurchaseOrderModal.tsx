@@ -78,7 +78,7 @@ export default function AddPurchaseOrderModal({ isOpen, onClose }: AddPurchaseOr
         id: '1',
         productName: '',
         description: '',
-        quantity: 1,
+        quantity: '',
         unitPrice: 0,
         vatRate: 20,
         total: 0,

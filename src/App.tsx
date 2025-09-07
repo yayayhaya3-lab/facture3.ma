@@ -26,6 +26,8 @@ import AdminLogin from './components/admin/AdminLogin';
 import AdminDashboard from './components/admin/AdminDashboard';
 import StockManagement from './components/stock/StockManagement';
 import HRManagement from './components/hr/HRManagement';
+import SupplierManagement from './components/suppliers/SupplierManagement';
+import { SupplierProvider } from './contexts/SupplierContext';
 
 function AppContent() {
   const { user, isAuthenticated, showExpiryAlert, setShowExpiryAlert, expiredDate } = useAuth();
@@ -69,6 +71,7 @@ function AppContent() {
             <Route path="/products" element={<ProductsList />} />
             <Route path="/stock-management" element={<StockManagement />} />
             <Route path="/hr-management" element={<HRManagement />} />
+            <Route path="/supplier-management" element={<SupplierManagement />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
@@ -110,7 +113,9 @@ function App() {
         <AuthProvider>
           <DataProvider>
             <LicenseProvider>
-              <AppContent />
+              <SupplierProvider>
+                <AppContent />
+              </SupplierProvider>
             </LicenseProvider>
           </DataProvider>
         </AuthProvider>

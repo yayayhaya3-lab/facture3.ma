@@ -319,7 +319,7 @@ export default function SupplierManagement() {
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <p className="text-blue-800 text-sm">
               💡 <strong>Information :</strong> Pour ajouter, modifier ou consulter les détails d'un fournisseur, 
-              utilisez la section dédiée "Fournisseurs" dans le menu principal.
+              utilisez la section dédiée "Fournisseurs\" dans le menu principal.
             </p>
           </div>
 

@@ -51,12 +51,6 @@ export default function Sidebar({ open, setOpen, onUpgrade }: SidebarProps) {
     }
   };
 
-  const handlePermissionClick = (e: React.MouseEvent, permission: string) => {
-    if (!hasPermission(permission)) {
-      e.preventDefault();
-      alert('Vous n\'avez pas accès à cette section. Contactez votre administrateur.');
-    }
-  };
 
   const menuItems = [
     { icon: LayoutDashboard, label: t('dashboard'), path: '/dashboard', permission: 'dashboard' },
@@ -109,6 +103,8 @@ export default function Sidebar({ open, setOpen, onUpgrade }: SidebarProps) {
     { icon: Settings, label: t('settings'), path: '/settings', permission: 'settings' },
   ];
 
+  // Filtrer les éléments de menu selon les permissions
+  const visibleMenuItems = menuItems.filter(item => hasPermission(item.permission || ''));
   return (
     <>
       <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${
@@ -140,15 +136,14 @@ export default function Sidebar({ open, setOpen, onUpgrade }: SidebarProps) {
 
         <nav className="mt-6 px-3">
           <ul className="space-y-2">
-            {menuItems.map((item) => {
+            {visibleMenuItems.map((item) => {
               const Icon = item.icon;
               const isProFeature = item.isPro;
               const canAccess = !isProFeature || isProActive;
-              const hasAccess = hasPermission(item.permission || '');
               
               return (
                 <li key={item.path}>
-                  {canAccess && hasAccess ? (
+                  {canAccess ? (
                     <NavLink
                       to={item.path}
                       className={({ isActive }) =>
@@ -171,7 +166,7 @@ export default function Sidebar({ open, setOpen, onUpgrade }: SidebarProps) {
                         </div>
                       )}
                     </NavLink>
-                  ) : !canAccess ? (
+                  ) : (
                     <button
                       onClick={(e) => handleProFeatureClick(e, item.path)}
                       className="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-200 group text-gray-500 hover:bg-red-50 hover:text-red-600 cursor-pointer"
@@ -182,21 +177,6 @@ export default function Sidebar({ open, setOpen, onUpgrade }: SidebarProps) {
                           <span className="font-medium ">{item.label}</span>
                           <span className="text-xs bg-red-800 text-red-900 px-1.5 py-0.5 rounded-full font-bold">
                             🔒
-                          </span>
-                        </div>
-                      )}
-                    </button>
-                  ) : (
-                    <button
-                      onClick={(e) => handlePermissionClick(e, item.permission || '')}
-                      className="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-200 group text-gray-400 hover:bg-gray-50 cursor-not-allowed"
-                    >
-                      <Icon className="w-5 h-5 flex-shrink-0" />
-                      {open && (
-                        <div className="flex items-center space-x-2">
-                          <span className="font-medium">{item.label}</span>
-                          <span className="text-xs bg-gray-300 text-gray-600 px-1.5 py-0.5 rounded-full font-bold">
-                            🚫
                           </span>
                         </div>
                       )}
@@ -213,11 +193,14 @@ export default function Sidebar({ open, setOpen, onUpgrade }: SidebarProps) {
           {/* Indicateur de rôle */}
           {user && (
             <div className={`mb-3 p-2 rounded-lg text-center text-xs ${
-              user.isAdmin 
+              user.email === 'admin@facture.ma'
+                ? 'bg-gradient-to-r from-red-500 to-pink-600 text-white'
+                : user.isAdmin 
                 ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white' 
                 : 'bg-gradient-to-r from-blue-500 to-cyan-600 text-white'
             }`}>
-              {user.isAdmin ? '👑 Administrateur' : '👤 Utilisateur'}
+              {user.email === 'admin@facture.ma' ? '🔧 Admin Plateforme' :
+               user.isAdmin ? '👑 Administrateur' : '👤 Utilisateur'}
             </div>
           )}
           

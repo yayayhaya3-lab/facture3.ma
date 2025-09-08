@@ -23,7 +23,6 @@ import UpgradePage from './components/license/UpgradePage';
 import ExpiryAlert from './components/license/ExpiryAlert';
 import ProUpgradeSuccess from './components/license/ProUpgradeSuccess';
 import { useLicense } from './contexts/LicenseContext';
-import AdminLogin from './components/admin/AdminLogin';
 import AdminDashboard from './components/admin/AdminDashboard';
 import StockManagement from './components/stock/StockManagement';
 import HRManagement from './components/hr/HRManagement';
@@ -44,14 +43,24 @@ function AppContent() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
     );
   }
 
+  // Si c'est l'admin de facture.ma, afficher le dashboard admin
+  if (user?.email === 'admin@facture.ma') {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Routes>
+          <Route path="/" element={<AdminDashboard />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
+        </Routes>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <LicenseAlert onUpgrade={() => setShowUpgradePage(true)} />

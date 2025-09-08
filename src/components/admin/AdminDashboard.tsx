@@ -34,13 +34,6 @@ export default function AdminDashboard() {
   const [editingCompany, setEditingCompany] = useState<Company | null>(null);
 
   useEffect(() => {
-    // Vérifier l'authentification admin
-    const adminAuth = localStorage.getItem('adminAuth');
-    if (!adminAuth) {
-      navigate('/admin/login');
-      return;
-    }
-
     loadCompanies();
   }, [navigate]);
 
@@ -63,8 +56,7 @@ export default function AdminDashboard() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('adminAuth');
-    navigate('/admin/login');
+    navigate('/login');
   };
 
   const getStatusBadge = (company: Company) => {

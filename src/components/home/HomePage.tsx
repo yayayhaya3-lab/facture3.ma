@@ -95,7 +95,6 @@ export default function HomePage() {
               <a href="#tarifs" className="text-gray-700 hover:text-teal-600 font-medium">Tarifs</a>
               <a href="#contact" className="text-gray-700 hover:text-teal-600 font-medium">Contact</a>
               <Link to="/login" className="text-gray-700 hover:text-teal-600 font-medium">Connexion</Link>
-              <Link to="/admin/login" className="text-red-600 hover:text-red-700 font-medium text-sm">Admin</Link>
             </nav>
 
             <Link

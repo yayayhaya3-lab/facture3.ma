@@ -207,6 +207,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
+      // Vérifier si c'est l'admin de facture.ma
+      if (email === 'admin@facture.ma' && password === 'Rahma1211?') {
+        // Créer un utilisateur admin spécial
+        setUser({
+          id: 'facture-admin',
+          name: 'Administrateur Facture.ma',
+          email: 'admin@facture.ma',
+          role: 'admin',
+          isAdmin: true,
+          entrepriseId: 'facture-admin',
+          company: {
+            name: 'Facture.ma Administration',
+            ice: 'ADMIN',
+            if: 'ADMIN',
+            rc: 'ADMIN',
+            cnss: 'ADMIN',
+            address: 'Casablanca, Maroc',
+            phone: '+212 522 123 456',
+            email: 'admin@facture.ma',
+            patente: 'ADMIN',
+            website: 'https://facture.ma',
+            subscription: 'pro',
+            subscriptionDate: new Date().toISOString(),
+            expiryDate: new Date(2030, 11, 31).toISOString() // Expire en 2030
+          }
+        });
+        return true;
+      }
+
       // D'abord, vérifier si c'est un utilisateur géré
       const managedUser = await checkManagedUser(email, password);
       

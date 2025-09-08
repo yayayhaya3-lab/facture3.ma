@@ -154,6 +154,12 @@ export default function Login() {
               <span>Créer un compte</span>
             </button>
           </div>
+          
+          <div className="text-center mt-4">
+            <p className="text-xs text-gray-500">
+              Admin Facture.ma ? Utilisez vos identifiants habituels
+            </p>
+          </div>
         </form>
       </div>
     </div>

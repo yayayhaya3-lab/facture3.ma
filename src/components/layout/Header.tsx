@@ -57,9 +57,14 @@ export default function Header({ sidebarOpen, setSidebarOpen }: HeaderProps) {
           {user?.company?.name && (
             <div className="text-lg font-bold text-gray-900 uppercase">
               {user.company.name}
-              {!user.isAdmin && (
+              {!user.isAdmin && user.email !== 'admin@facture.ma' && (
                 <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
                   Utilisateur
+                </span>
+              )}
+              {user.email === 'admin@facture.ma' && (
+                <span className="ml-2 text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">
+                  Admin Plateforme
                 </span>
               )}
             </div>
@@ -89,7 +94,8 @@ export default function Header({ sidebarOpen, setSidebarOpen }: HeaderProps) {
                     <div className="px-4 py-2 border-b border-gray-200">
                       <p className="text-sm font-medium text-gray-900">{user.name}</p>
                       <p className="text-xs text-gray-500">
-                        {user.isAdmin ? 'Administrateur' : 'Utilisateur'}
+                        {user.email === 'admin@facture.ma' ? 'Admin Plateforme' : 
+                         user.isAdmin ? 'Administrateur' : 'Utilisateur'}
                       </p>
                     </div>
                   )}

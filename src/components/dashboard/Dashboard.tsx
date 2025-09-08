@@ -22,6 +22,9 @@ export default function Dashboard() {
 
   // Message de bienvenue personnalisé
   const getWelcomeMessage = () => {
+    if (user?.email === 'admin@facture.ma') {
+      return `Bienvenue Administrateur Facture.ma ! Vous gérez la plateforme.`;
+    }
     if (user?.isAdmin) {
       return `Bienvenue ${user.name} ! Vous êtes connecté en tant qu'administrateur.`;
     } else {

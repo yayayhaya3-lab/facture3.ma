@@ -372,7 +372,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error('Erreur lors de la vérification de l\'expiration:', error);
     }
   };
-          entrepriseId: firebaseUser.uid, // Pour les admins, l'ID utilisateur = ID entreprise
 
   const logout = async (): Promise<void> => {
     try {

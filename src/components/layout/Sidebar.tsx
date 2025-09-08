@@ -92,13 +92,13 @@ export default function Sidebar({ open, setOpen, onUpgrade }: SidebarProps) {
     },
     
     // Gestion de compte (seulement pour les admins Pro)
-    ...(user?.isAdmin && isProActive ? [{
+   {
       icon: Shield,
       label: 'Gestion de Compte',
       path: '/account-management',
       isPro: true,
       permission: 'settings'
-    }] : []),
+    },
     
     { icon: Settings, label: t('settings'), path: '/settings', permission: 'settings' },
   ];

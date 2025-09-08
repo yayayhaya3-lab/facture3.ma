@@ -157,35 +157,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const userDoc = await getDoc(doc(db, 'entreprises', firebaseUser.uid));
           if (userDoc.exists()) {
             const userData = userDoc.data();
-            setUser({
-              id: firebaseUser.uid,
-              name: userData.ownerName || firebaseUser.email?.split('@')[0] || 'Utilisateur',
-              email: firebaseUser.email || '',
-              role: 'admin',
-              isAdmin: true,
-              company: {
-                name: userData.name,
-                ice: userData.ice,
-                if: userData.if,
-                rc: userData.rc,
-                cnss: userData.cnss,
-                address: userData.address,
-                phone: userData.phone,
-                logo: userData.logo,
-                email: userData.email,
-                signature: userData.signature || "",
-                patente: userData.patente,
-                website: userData.website,
-                invoiceNumberingFormat: userData.invoiceNumberingFormat,
-                invoicePrefix: userData.invoicePrefix,
-                invoiceCounter: userData.invoiceCounter,
-                lastInvoiceYear: userData.lastInvoiceYear,
-                defaultTemplate: userData.defaultTemplate || 'template1',
-                subscription: userData.subscription || 'free',
-                subscriptionDate: userData.subscriptionDate,
-                expiryDate: userData.expiryDate
-              }
-            });
+       setUser({
+  id: firebaseUser.uid,
+  name: userData.ownerName || firebaseUser.email?.split('@')[0] || 'Utilisateur',
+  email: firebaseUser.email || '',
+  role: 'admin',
+  isAdmin: true,
+  entrepriseId: firebaseUser.uid, // ✅ placé ici correctement
+  company: {
+    name: userData.name,
+    ice: userData.ice,
+    if: userData.if,
+    rc: userData.rc,
+    cnss: userData.cnss,
+    address: userData.address,
+    phone: userData.phone,
+    logo: userData.logo,
+    email: userData.email,
+    signature: userData.signature || "",
+    patente: userData.patente,
+    website: userData.website,
+    invoiceNumberingFormat: userData.invoiceNumberingFormat,
+    invoicePrefix: userData.invoicePrefix,
+    invoiceCounter: userData.invoiceCounter,
+    lastInvoiceYear: userData.lastInvoiceYear,
+    defaultTemplate: userData.defaultTemplate || 'template1',
+    subscription: userData.subscription || 'free',
+    subscriptionDate: userData.subscriptionDate,
+    expiryDate: userData.expiryDate
+  }
+});
+
             
             // Vérifier l'expiration de l'abonnement à chaque connexion
             await checkSubscriptionExpiry(firebaseUser.uid, userData);

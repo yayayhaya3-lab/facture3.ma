@@ -39,6 +39,7 @@ interface User {
   email: string;
   role: 'admin' | 'user';
   isAdmin: boolean;
+  entrepriseId?: string; // ID de l'entreprise pour les utilisateurs gérés
   permissions?: {
     dashboard: boolean;
     invoices: boolean;
@@ -226,6 +227,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             role: 'user',
             isAdmin: false,
             permissions: managedUser.permissions,
+            // Utiliser l'ID de l'entreprise pour accéder aux données partagées
+            entrepriseId: managedUser.entrepriseId,
             company: {
               name: companyData.name,
               ice: companyData.ice,
@@ -367,10 +370,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error('Erreur lors de la vérification de l\'expiration:', error);
     }
   };
+          entrepriseId: firebaseUser.uid, // Pour les admins, l'ID utilisateur = ID entreprise
 
   const logout = async (): Promise<void> => {
     try {
-      await signOut(auth);
+      // Vérifier si c'est un utilisateur géré (pas connecté via Firebase)
+      if (user && !user.isAdmin) {
+        // Pour les utilisateurs gérés, simplement nettoyer l'état local
+        setUser(null);
+        setFirebaseUser(null);
+      } else {
+        // Pour les admins, déconnexion Firebase normale
+        await signOut(auth);
+      }
     } catch (error) {
       console.error('Erreur lors de la déconnexion:', error);
     }

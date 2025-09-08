@@ -40,6 +40,32 @@ export default function AccountManagement() {
   // Vérifier l'accès PRO
   const isProActive = user?.company.subscription === 'pro' && user?.company.expiryDate && 
     new Date(user.company.expiryDate) > new Date();
+  
+  // Seuls les admins peuvent accéder à la gestion de compte
+  if (!user?.isAdmin) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
+          <div className="w-20 h-20 bg-gradient-to-br from-red-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Shield className="w-10 h-10 text-white" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            🔒 Accès Administrateur Requis
+          </h2>
+          <p className="text-gray-600 mb-6">
+            La Gestion de Compte est réservée aux administrateurs. 
+            Seul le propriétaire du compte peut créer et gérer les utilisateurs.
+          </p>
+          <button 
+            onClick={() => window.history.back()}
+            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200"
+          >
+            Retour
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (!isProActive) {
     return (

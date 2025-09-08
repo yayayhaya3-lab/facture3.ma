@@ -11,6 +11,14 @@ interface HeaderProps {
 export default function Header({ sidebarOpen, setSidebarOpen }: HeaderProps) {
   const { user, logout } = useAuth();
   const { language, setLanguage } = useLanguage();
+  
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error);
+    }
+  };
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
@@ -86,7 +94,7 @@ export default function Header({ sidebarOpen, setSidebarOpen }: HeaderProps) {
                     </div>
                   )}
                   <button
-                    onClick={logout}
+                    onClick={handleLogout}
                     className="flex items-center space-x-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                   >
                     <LogOut className="w-4 h-4" />

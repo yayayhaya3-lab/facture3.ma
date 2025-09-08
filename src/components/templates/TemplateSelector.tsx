@@ -6,6 +6,7 @@ interface TemplateSelectorProps {
   selectedTemplate: string;
   onTemplateSelect: (templateId: string) => void;
   allowProSelection?: boolean;
+  disabled?: boolean;
 }
 
 const templates = [
@@ -46,7 +47,7 @@ const templates = [
   }
 ];
 
-export default function TemplateSelector({ selectedTemplate, onTemplateSelect, allowProSelection = true }: TemplateSelectorProps) {
+export default function TemplateSelector({ selectedTemplate, onTemplateSelect, allowProSelection = true, disabled = false }: TemplateSelectorProps) {
   const { licenseType } = useLicense();
 
   return (
@@ -61,11 +62,12 @@ export default function TemplateSelector({ selectedTemplate, onTemplateSelect, a
             <div
               key={template.id}
               className={`relative border-2 rounded-lg p-4 cursor-pointer transition-all duration-200 ${
+                disabled ? 'opacity-50 cursor-not-allowed' :
                 isSelected 
                   ? 'border-teal-500 bg-teal-50' 
                     : 'border-gray-200 hover:border-teal-300 hover:bg-teal-50'
               }`}
-              onClick={() => onTemplateSelect(template.id)}
+              onClick={() => !disabled && onTemplateSelect(template.id)}
             >
               {/* Preview placeholder */}
               <div className="w-full h-24 bg-gray-100 rounded mb-3 flex items-center justify-center">

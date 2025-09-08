@@ -128,7 +128,8 @@ export function SupplierProvider({ children }: { children: ReactNode }) {
     if (!isAuthenticated || !user) return;
 
     setIsLoading(true);
-    const entrepriseId = user.id;
+    // Utiliser l'ID de l'entreprise pour tous les utilisateurs (admin et gérés)
+    const entrepriseId = user.isAdmin ? user.id : user.entrepriseId;
 
     // Fournisseurs
     const suppliersQuery = query(
@@ -211,7 +212,7 @@ export function SupplierProvider({ children }: { children: ReactNode }) {
     try {
       await addDoc(collection(db, 'suppliers'), {
         ...supplierData,
-        entrepriseId: user.id,
+        entrepriseId: user.isAdmin ? user.id : user.entrepriseId,
         createdAt: new Date().toISOString()
       });
     } catch (error) {
@@ -245,7 +246,7 @@ export function SupplierProvider({ children }: { children: ReactNode }) {
     try {
       await addDoc(collection(db, 'supplierProducts'), {
         ...productData,
-        entrepriseId: user.id,
+        entrepriseId: user.isAdmin ? user.id : user.entrepriseId,
         createdAt: new Date().toISOString()
       });
     } catch (error) {
@@ -282,7 +283,7 @@ export function SupplierProvider({ children }: { children: ReactNode }) {
       await addDoc(collection(db, 'purchaseOrders'), {
         ...orderData,
         number: orderNumber,
-        entrepriseId: user.id,
+        entrepriseId: user.isAdmin ? user.id : user.entrepriseId,
         createdAt: new Date().toISOString()
       });
     } catch (error) {
@@ -316,7 +317,7 @@ export function SupplierProvider({ children }: { children: ReactNode }) {
     try {
       await addDoc(collection(db, 'supplierPayments'), {
         ...paymentData,
-        entrepriseId: user.id,
+        entrepriseId: user.isAdmin ? user.id : user.entrepriseId,
         createdAt: new Date().toISOString()
       });
     } catch (error) {

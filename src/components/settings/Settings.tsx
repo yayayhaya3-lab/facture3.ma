@@ -92,6 +92,12 @@ export default function Settings() {
   const handleSaveInvoiceSettings = async () => {
     if (!user) return;
     
+    // Seuls les admins peuvent modifier les paramètres de facturation
+    if (!user.isAdmin) {
+      alert('Seuls les administrateurs peuvent modifier les paramètres de facturation');
+      return;
+    }
+    
     setIsSaving(true);
     try {
       await updateCompanySettings({
@@ -111,6 +117,12 @@ export default function Settings() {
   const handleSaveTemplateSettings = async () => {
     if (!user) return;
     
+    // Seuls les admins peuvent modifier le modèle par défaut
+    if (!user.isAdmin) {
+      alert('Seuls les administrateurs peuvent modifier le modèle par défaut');
+      return;
+    }
+    
     setIsSavingTemplate(true);
     try {
       await updateCompanySettings({
@@ -128,6 +140,12 @@ export default function Settings() {
 
   const handleSaveSignature = async () => {
     if (!user) return;
+    
+    // Seuls les admins peuvent modifier la signature
+    if (!user.isAdmin) {
+      alert('Seuls les administrateurs peuvent modifier la signature électronique');
+      return;
+    }
     
     setIsSavingSignature(true);
     try {
@@ -147,6 +165,12 @@ export default function Settings() {
 
   const handleSaveCompanyInfo = async () => {
     if (!user) return;
+    
+    // Seuls les admins peuvent modifier les informations de l'entreprise
+    if (!user.isAdmin) {
+      alert('Seuls les administrateurs peuvent modifier les informations de l\'entreprise');
+      return;
+    }
     
     setIsSavingCompany(true);
     try {
@@ -206,6 +230,7 @@ export default function Settings() {
                   type="text"
                   value={companyData.name}
                   onChange={(e) => handleCompanyDataChange('name', e.target.value)}
+                  disabled={!user?.isAdmin}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                 />
               </div>
@@ -217,6 +242,7 @@ export default function Settings() {
                   type="text"
                   value={companyData.ice}
                   onChange={(e) => handleCompanyDataChange('ice', e.target.value)}
+                  disabled={!user?.isAdmin}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                 />
               </div>
@@ -332,6 +358,7 @@ export default function Settings() {
             </div>
 
             <div className="mt-6 pt-6 border-t border-gray-200">
+              {user?.isAdmin ? (
               <button 
                 onClick={handleSaveCompanyInfo}
                 disabled={isSavingCompany}
@@ -339,6 +366,13 @@ export default function Settings() {
               >
                 {isSavingCompany ? 'Sauvegarde...' : 'Sauvegarder les modifications'}
               </button>
+              ) : (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                  <p className="text-amber-800 text-sm">
+                    ℹ️ Seuls les administrateurs peuvent modifier les informations de l'entreprise.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -359,6 +393,7 @@ export default function Settings() {
                 <select
                   value={invoiceSettings.format}
                   onChange={(e) => setInvoiceSettings({...invoiceSettings, format: e.target.value})}
+                  disabled={!user?.isAdmin}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                 >
                   {formatOptions.map(option => (
@@ -381,6 +416,7 @@ export default function Settings() {
                   type="text"
                   value={invoiceSettings.prefix}
                   onChange={(e) => setInvoiceSettings({...invoiceSettings, prefix: e.target.value.toUpperCase()})}
+                  disabled={!user?.isAdmin}
                   maxLength={5}
                   className="w-32 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                   placeholder="FAC"
@@ -402,6 +438,7 @@ export default function Settings() {
                 </ul>
               </div>
               
+              {user?.isAdmin ? (
               <button
                 onClick={handleSaveInvoiceSettings}
                 disabled={isSaving}
@@ -409,6 +446,13 @@ export default function Settings() {
               >
                 {isSaving ? 'Sauvegarde...' : 'Sauvegarder (Factures & Devis)'}
               </button>
+              ) : (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                  <p className="text-amber-800 text-sm">
+                    ℹ️ Seuls les administrateurs peuvent modifier les paramètres de facturation.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -429,6 +473,7 @@ export default function Settings() {
                 <TemplateSelector 
                   selectedTemplate={defaultTemplate}
                   onTemplateSelect={setDefaultTemplate}
+                  disabled={!user?.isAdmin}
                 />
               </div>
               
@@ -441,6 +486,7 @@ export default function Settings() {
                 </ul>
               </div>
               
+              {user?.isAdmin ? (
               <button
                 onClick={handleSaveTemplateSettings}
                 disabled={isSavingTemplate}
@@ -448,6 +494,13 @@ export default function Settings() {
               >
                 {isSavingTemplate ? 'Sauvegarde...' : 'Sauvegarder le modèle par défaut'}
               </button>
+              ) : (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                  <p className="text-amber-800 text-sm">
+                    ℹ️ Seuls les administrateurs peuvent modifier le modèle par défaut.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -469,6 +522,7 @@ export default function Settings() {
                   type="url"
                   value={signatureUrl}
                   onChange={(e) => setSignatureUrl(e.target.value)}
+                  disabled={!user?.isAdmin}
 
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                   placeholder="https://i.ibb.co/votre-signature.png"
@@ -499,6 +553,7 @@ export default function Settings() {
               </div>
               
               <div className="flex space-x-3">
+                {user?.isAdmin ? (
                 <button
                   onClick={handleSaveSignature}
                   disabled={isSavingSignature || !signatureUrl}
@@ -506,6 +561,13 @@ export default function Settings() {
                 >
                   {isSavingSignature ? 'Sauvegarde...' : 'Sauvegarder la signature'}
                 </button>
+                ) : (
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                    <p className="text-amber-800 text-sm">
+                      ℹ️ Seuls les administrateurs peuvent modifier la signature électronique.
+                    </p>
+                  </div>
+                )}
                 <button
                   onClick={() => setShowSignatureModal(true)}
                   className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"

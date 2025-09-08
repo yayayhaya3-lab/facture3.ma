@@ -205,7 +205,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
     if (!isAuthenticated || !user) return;
 
     setIsLoading(true);
-    const entrepriseId = user.id;
+    // Utiliser l'ID de l'entreprise pour tous les utilisateurs (admin et gérés)
+    const entrepriseId = user.isAdmin ? user.id : user.entrepriseId;
 
     // Clients
     const clientsQuery = query(
@@ -382,7 +383,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     try {
       await addDoc(collection(db, 'clients'), {
         ...clientData,
-        entrepriseId: user.id,
+        entrepriseId: user.isAdmin ? user.id : user.entrepriseId,
         createdAt: new Date().toISOString()
       });
     } catch (error) {
@@ -420,7 +421,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       await addDoc(collection(db, 'products'), {
         ...productData,
         sku,
-        entrepriseId: user.id,
+        entrepriseId: user.isAdmin ? user.id : user.entrepriseId,
         createdAt: new Date().toISOString()
       });
     } catch (error) {
@@ -470,7 +471,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         number: invoiceNumber,
         totalInWords,
         status: 'unpaid', // Statut par défaut
-        entrepriseId: user.id,
+        entrepriseId: user.isAdmin ? user.id : user.entrepriseId,
         createdAt: new Date().toISOString()
       });
 
@@ -513,7 +514,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         ...quoteData,
         number: quoteNumber,
         totalInWords,
-        entrepriseId: user.id,
+        entrepriseId: user.isAdmin ? user.id : user.entrepriseId,
         createdAt: new Date().toISOString()
       });
     } catch (error) {
@@ -575,7 +576,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     try {
       await addDoc(collection(db, 'employees'), {
         ...employeeData,
-        entrepriseId: user.id,
+        entrepriseId: user.isAdmin ? user.id : user.entrepriseId,
         createdAt: new Date().toISOString()
       });
     } catch (error) {
@@ -609,7 +610,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     try {
       await addDoc(collection(db, 'overtimes'), {
         ...overtimeData,
-        entrepriseId: user.id,
+        entrepriseId: user.isAdmin ? user.id : user.entrepriseId,
         createdAt: new Date().toISOString()
       });
     } catch (error) {
@@ -643,7 +644,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     try {
       await addDoc(collection(db, 'leaves'), {
         ...leaveData,
-        entrepriseId: user.id,
+        entrepriseId: user.isAdmin ? user.id : user.entrepriseId,
         createdAt: new Date().toISOString()
       });
     } catch (error) {

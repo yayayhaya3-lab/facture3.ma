@@ -87,7 +87,8 @@ export function UserManagementProvider({ children }: { children: ReactNode }) {
     if (!isAuthenticated || !user) return;
 
     setIsLoading(true);
-    const entrepriseId = user.id;
+    // Utiliser l'ID de l'entreprise pour tous les utilisateurs (admin et gérés)
+    const entrepriseId = user.isAdmin ? user.id : user.entrepriseId;
 
     const usersQuery = query(
       collection(db, 'managedUsers'),
@@ -117,8 +118,8 @@ export function UserManagementProvider({ children }: { children: ReactNode }) {
     try {
       await addDoc(collection(db, 'managedUsers'), {
         ...userData,
-        createdBy: user.id,
-        entrepriseId: user.id,
+        createdBy: user.isAdmin ? user.id : user.entrepriseId,
+        entrepriseId: user.isAdmin ? user.id : user.entrepriseId,
         createdAt: new Date().toISOString()
       });
     } catch (error) {

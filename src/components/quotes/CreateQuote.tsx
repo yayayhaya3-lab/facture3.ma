@@ -537,7 +537,7 @@ export default function CreateQuote() {
                     totalTTC,
                     status: 'draft',
                     createdAt: new Date().toISOString(),
-                    entrepriseId: user?.id || ''
+                    entrepriseId: user?.isAdmin ? user.id : user.entrepriseId || ''
                   }}
                   type="quote"
                   includeSignature={includeSignature}

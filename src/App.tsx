@@ -44,6 +44,7 @@ function AppContent() {
     expiredDate,
     isSubscriptionExpired,
     isSubscriptionExpiringSoon,
+    useEffect,
     subscriptionDaysRemaining
   } = useAuth();
   const { showSuccessModal, setShowSuccessModal, upgradeExpiryDate } = useLicense();

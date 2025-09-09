@@ -5,6 +5,9 @@ import { LanguageProvider } from './contexts/LanguageContext';
 import { DataProvider } from './contexts/DataContext';
 import { LicenseProvider } from './contexts/LicenseContext';
 import { UserManagementProvider } from './contexts/UserManagementContext';
+import { useSubscriptionStatus } from './hooks/useSubscriptionStatus';
+import ExpirationNotification from './components/auth/ExpirationNotification';
+import ExpiredAccountModal from './components/auth/ExpiredAccountModal';
 import HomePage from './components/home/HomePage';
 import Login from './components/auth/Login';
 import Dashboard from './components/dashboard/Dashboard';
@@ -30,12 +33,39 @@ import SupplierManagement from './components/suppliers/SupplierManagement';
 import SuppliersSection from './components/suppliers/SuppliersSection';
 import AccountManagement from './components/account/AccountManagement';
 import { SupplierProvider } from './contexts/SupplierContext';
+import SubscriptionGuard from './components/license/SubscriptionGuard';
 
 function AppContent() {
-  const { user, isAuthenticated, showExpiryAlert, setShowExpiryAlert, expiredDate } = useAuth();
+  const { 
+    user, 
+    isAuthenticated, 
+    showExpiryAlert, 
+    setShowExpiryAlert, 
+    expiredDate,
+    isSubscriptionExpired,
+    isSubscriptionExpiringSoon,
+    subscriptionDaysRemaining
+  } = useAuth();
   const { showSuccessModal, setShowSuccessModal, upgradeExpiryDate } = useLicense();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showUpgradePage, setShowUpgradePage] = useState(false);
+  const [showExpirationNotification, setShowExpirationNotification] = useState(true);
+  const [showExpiredAccountModal, setShowExpiredAccountModal] = useState(false);
+
+  // Vérifier le statut de l'abonnement au chargement
+  useEffect(() => {
+    if (user && isAuthenticated) {
+      // Si l'abonnement est expiré et que c'est un utilisateur géré, afficher le modal de blocage
+      if (isSubscriptionExpired && !user.isAdmin) {
+        setShowExpiredAccountModal(true);
+      }
+      
+      // Si l'abonnement expire bientôt et que c'est un admin, afficher la notification
+      if (isSubscriptionExpiringSoon && user.isAdmin) {
+        setShowExpirationNotification(true);
+      }
+    }
+  }, [user, isAuthenticated, isSubscriptionExpired, isSubscriptionExpiringSoon]);
 
   if (!isAuthenticated) {
     return (
@@ -62,62 +92,90 @@ function AppContent() {
     );
   }
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <LicenseAlert onUpgrade={() => setShowUpgradePage(true)} />
-      <Sidebar 
-        open={sidebarOpen} 
-        setOpen={setSidebarOpen} 
-        onUpgrade={() => setShowUpgradePage(true)} 
-      />
-      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-16'}`}>
-        <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-        <main className="p-6">
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/invoices" element={<InvoicesList />} />
-            <Route path="/invoices/create" element={<CreateInvoice />} />
-            <Route path="/quotes" element={<QuotesList />} />
-            <Route path="/quotes/create" element={<CreateQuote />} />
-            <Route path="/clients" element={<ClientsList />} />
-            <Route path="/products" element={<ProductsList />} />
-            <Route path="/suppliers" element={<SuppliersSection />} />
-            <Route path="/stock-management" element={<StockManagement />} />
-            <Route path="/supplier-management" element={<SupplierManagement />} />
-            <Route path="/hr-management" element={<HRManagement />} />
-            <Route path="/account-management" element={<AccountManagement />} />
-            <Route path="/reports" element={<Reports />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
-          </Routes>
-        </main>
+    <SubscriptionGuard>
+      <div className="min-h-screen bg-gray-50 flex">
+        {/* Notification d'expiration proche */}
+        {isSubscriptionExpiringSoon && user?.isAdmin && showExpirationNotification && (
+          <div className="fixed top-0 left-0 right-0 z-50">
+            <ExpirationNotification
+              daysRemaining={subscriptionDaysRemaining}
+              onRenew={() => {
+                setShowExpirationNotification(false);
+                setShowUpgradePage(true);
+              }}
+              onDismiss={() => setShowExpirationNotification(false)}
+            />
+          </div>
+        )}
+        
+        <LicenseAlert onUpgrade={() => setShowUpgradePage(true)} />
+        <Sidebar 
+          open={sidebarOpen} 
+          setOpen={setSidebarOpen} 
+          onUpgrade={() => setShowUpgradePage(true)} 
+        />
+        <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-16'} ${
+          isSubscriptionExpiringSoon && user?.isAdmin && showExpirationNotification ? 'mt-20' : ''
+        }`}>
+          <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+          <main className="p-6">
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/invoices" element={<InvoicesList />} />
+              <Route path="/invoices/create" element={<CreateInvoice />} />
+              <Route path="/quotes" element={<QuotesList />} />
+              <Route path="/quotes/create" element={<CreateQuote />} />
+              <Route path="/clients" element={<ClientsList />} />
+              <Route path="/products" element={<ProductsList />} />
+              <Route path="/suppliers" element={<SuppliersSection />} />
+              <Route path="/stock-management" element={<StockManagement />} />
+              <Route path="/supplier-management" element={<SupplierManagement />} />
+              <Route path="/hr-management" element={<HRManagement />} />
+              <Route path="/account-management" element={<AccountManagement />} />
+              <Route path="/reports" element={<Reports />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            </Routes>
+          </main>
+        </div>
+        
+        
+        {showUpgradePage && (
+          <UpgradePage onClose={() => setShowUpgradePage(false)} />
+        )}
+        
+        {showExpiryAlert && expiredDate && (
+          <ExpiryAlert
+            isOpen={showExpiryAlert}
+            onRenew={() => {
+              setShowExpiryAlert(false);
+              setShowUpgradePage(true);
+            }}
+            onLater={() => setShowExpiryAlert(false)}
+            expiryDate={expiredDate}
+          />
+        )}
+        
+        {showSuccessModal && upgradeExpiryDate && (
+          <ProUpgradeSuccess
+            isOpen={showSuccessModal}
+            onClose={() => setShowSuccessModal(false)}
+            expiryDate={upgradeExpiryDate}
+          />
+        )}
+        
+        {/* Modal de compte expiré */}
+        {showExpiredAccountModal && user?.company?.expiryDate && (
+          <ExpiredAccountModal
+            isOpen={showExpiredAccountModal}
+            onClose={() => setShowExpiredAccountModal(false)}
+            isAdmin={user.isAdmin}
+            expiryDate={user.company.expiryDate}
+          />
+        )}
       </div>
-      
-      
-      {showUpgradePage && (
-        <UpgradePage onClose={() => setShowUpgradePage(false)} />
-      )}
-      
-      {showExpiryAlert && expiredDate && (
-        <ExpiryAlert
-          isOpen={showExpiryAlert}
-          onRenew={() => {
-            setShowExpiryAlert(false);
-            setShowUpgradePage(true);
-          }}
-          onLater={() => setShowExpiryAlert(false)}
-          expiryDate={expiredDate}
-        />
-      )}
-      
-      {showSuccessModal && upgradeExpiryDate && (
-        <ProUpgradeSuccess
-          isOpen={showSuccessModal}
-          onClose={() => setShowSuccessModal(false)}
-          expiryDate={upgradeExpiryDate}
-        />
-      )}
-    </div>
+    </SubscriptionGuard>
   );
 }
 

@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Building2, User, Bell, Shield, FileText, Palette, X } from 'lucide-react';
 import TemplateSelector from '../templates/TemplateSelector';
+import SubscriptionStatus from './SubscriptionStatus';
 
 export default function Settings() {
   const { user, updateCompanySettings } = useAuth();
@@ -604,6 +605,9 @@ export default function Settings() {
 
         {/* Quick Actions */}
         <div className="space-y-6">
+          {/* Statut de l'abonnement */}
+          <SubscriptionStatus />
+          
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div className="flex items-center space-x-3 mb-6">
               <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg flex items-center justify-center">

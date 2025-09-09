@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSupplier } from '../../contexts/SupplierContext';
+import { useSubscriptionStatus } from '../../hooks/useSubscriptionStatus';
 import { 
   Truck, 
   Crown,
@@ -33,6 +34,7 @@ import html2pdf from 'html2pdf.js';
 
 export default function SupplierManagement() {
   const { user } = useAuth();
+  const subscriptionStatus = useSubscriptionStatus();
   const { 
     suppliers, 
     purchaseOrders, 
@@ -47,7 +49,7 @@ export default function SupplierManagement() {
 
   // Vérifier l'accès PRO
   const isProActive = user?.company.subscription === 'pro' && user?.company.expiryDate && 
-    new Date(user.company.expiryDate) > new Date();
+    !subscriptionStatus.isExpired;
 
   if (!isProActive) {
     return (
@@ -62,11 +64,16 @@ export default function SupplierManagement() {
           <p className="text-gray-600 mb-6">
             La Gestion Avancée des Fournisseurs est réservée aux abonnés PRO. 
             Passez à la version PRO pour accéder à cette fonctionnalité avancée.
+           {subscriptionStatus.isExpired && (
+             <span className="block mt-2 text-red-600 font-medium">
+               ⚠️ Votre abonnement Pro a expiré. Renouvelez-le pour retrouver l'accès.
+             </span>
+           )}
           </p>
           <button className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200">
             <span className="flex items-center justify-center space-x-2">
               <Crown className="w-5 h-5" />
-              <span>Passer à PRO - 299 MAD/mois</span>
+             <span>{subscriptionStatus.isExpired ? 'Renouveler' : 'Passer à'} PRO - 299 MAD/mois</span>
             </span>
           </button>
         </div>

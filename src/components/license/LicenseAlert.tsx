@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLicense } from '../../contexts/LicenseContext';
+import { useSubscriptionStatus } from '../../hooks/useSubscriptionStatus';
 import { AlertTriangle, Crown, X } from 'lucide-react';
 
 interface LicenseAlertProps {
@@ -8,9 +9,11 @@ interface LicenseAlertProps {
 
 export default function LicenseAlert({ onUpgrade }: LicenseAlertProps) {
   const { isLimitReached, limitMessage, licenseType } = useLicense();
+  const subscriptionStatus = useSubscriptionStatus();
   const [isVisible, setIsVisible] = React.useState(true);
 
-  if (!isLimitReached || licenseType === 'pro' || !isVisible) {
+  // Ne pas afficher si Pro actif, ou si abonnement expiré (autre notification prioritaire)
+  if (!isLimitReached || (licenseType === 'pro' && !subscriptionStatus.isExpired) || !isVisible) {
     return null;
   }
 
@@ -20,8 +23,15 @@ export default function LicenseAlert({ onUpgrade }: LicenseAlertProps) {
         <div className="flex items-center space-x-3">
           <AlertTriangle className="w-6 h-6 flex-shrink-0" />
           <div>
-            <p className="font-semibold text-lg">Version Gratuite - Limite Atteinte</p>
-            <p className="text-sm opacity-90">{limitMessage}</p>
+            <p className="font-semibold text-lg">
+              {subscriptionStatus.isExpired ? 'Abonnement Pro Expiré' : 'Version Gratuite - Limite Atteinte'}
+            </p>
+            <p className="text-sm opacity-90">
+              {subscriptionStatus.isExpired 
+                ? 'Votre abonnement Pro a expiré. Renouvelez-le pour retrouver toutes les fonctionnalités.'
+                : limitMessage
+              }
+            </p>
           </div>
         </div>
         
@@ -31,7 +41,7 @@ export default function LicenseAlert({ onUpgrade }: LicenseAlertProps) {
             className="inline-flex items-center space-x-2 bg-white text-orange-600 hover:bg-gray-100 px-6 py-2 rounded-lg font-semibold transition-colors shadow-lg"
           >
             <Crown className="w-4 h-4" />
-            <span>Acheter la version Pro</span>
+            <span>{subscriptionStatus.isExpired ? 'Renouveler' : 'Acheter'} la version Pro</span>
           </button>
           
           <button

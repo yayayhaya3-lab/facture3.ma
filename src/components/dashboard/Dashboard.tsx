@@ -2,6 +2,7 @@ import React from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useData } from '../../contexts/DataContext';
+import { useSubscriptionStatus } from '../../hooks/useSubscriptionStatus';
 import StatsCards from './StatsCards';
 import RecentInvoices from './RecentInvoices';
 import TopProducts from './TopProducts';
@@ -10,6 +11,7 @@ export default function Dashboard() {
   const { user, checkSubscriptionExpiry } = useAuth();
   const { t } = useLanguage();
   const { invoices, clients, products } = useData();
+  const subscriptionStatus = useSubscriptionStatus();
 
   // Vérifier l'expiration à l'ouverture du dashboard
   React.useEffect(() => {
@@ -59,6 +61,48 @@ export default function Dashboard() {
           {getWelcomeMessage()}
         </p>
       </div>
+  
+  {/* Alerte d'abonnement expiré pour les admins */}
+  {subscriptionStatus.isExpired && user?.isAdmin && (
+    <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+      <div className="flex items-center space-x-3 mb-4">
+        <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center">
+          <span className="text-white text-xl">⚠️</span>
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold text-red-900">Abonnement Pro Expiré</h3>
+          <p className="text-red-800">
+            Votre abonnement Pro a expiré le {subscriptionStatus.expiryDate ? 
+              new Date(subscriptionStatus.expiryDate).toLocaleDateString('fr-FR') : 'récemment'}.
+          </p>
+        </div>
+      </div>
+      <div className="bg-red-100 border border-red-300 rounded-lg p-4 mb-4">
+        <h4 className="font-medium text-red-900 mb-2">🚫 Restrictions Actives</h4>
+        <ul className="text-sm text-red-800 space-y-1">
+          <li>• Vous êtes maintenant en version gratuite avec des limitations</li>
+          <li>• Les comptes utilisateurs que vous avez créés sont temporairement bloqués</li>
+          <li>• Fonctionnalités Pro désactivées (Gestion Stock, RH, Rapports avancés)</li>
+          <li>• Limites: 10 factures, 10 clients, 20 produits, 10 devis</li>
+        </ul>
+      </div>
+      <div className="flex space-x-3">
+        <button
+          onClick={() => window.location.href = '/upgrade'}
+          className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200"
+        >
+          Renouveler maintenant - 299 MAD/mois
+        </button>
+        <button
+          onClick={() => {/* Masquer temporairement */}}
+          className="px-6 py-3 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors"
+        >
+          Plus tard
+        </button>
+      </div>
+    </div>
+  )}
+  
       <StatsCards />
 
       {!hasAnyData && (

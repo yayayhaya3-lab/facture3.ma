@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useLicense } from '../../contexts/LicenseContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useSubscriptionStatus } from '../../hooks/useSubscriptionStatus';
 import { 
   LayoutDashboard, 
   FileText, 
@@ -30,10 +31,12 @@ export default function Sidebar({ open, setOpen, onUpgrade }: SidebarProps) {
   const { t } = useLanguage();
   const { licenseType } = useLicense();
   const { user } = useAuth();
+  const subscriptionStatus = useSubscriptionStatus();
 
   // Vérifier si l'abonnement Pro est actif et non expiré
-  const isProActive = user?.company.subscription === 'pro' && user?.company.expiryDate && 
-    new Date(user.company.expiryDate) > new Date();
+  const isProActive = user?.company.subscription === 'pro' && 
+    user?.company.expiryDate && 
+    !subscriptionStatus.isExpired;
   
   // Vérifier si l'activation est en cours
   const isActivationPending = localStorage.getItem('proActivationPending') === 'true';
@@ -204,7 +207,38 @@ export default function Sidebar({ open, setOpen, onUpgrade }: SidebarProps) {
             </div>
           )}
           
-          {isProActive ? (
+          {/* Affichage du statut d'abonnement */}
+          {subscriptionStatus.isExpired && user?.isAdmin ? (
+            <div className="bg-gradient-to-r from-red-500 to-orange-500 rounded-lg p-3 text-white text-center">
+              <div className="text-xs font-medium mb-1">⚠️ Expiré</div>
+              <div className="text-xs opacity-90">
+                Expiré le: {subscriptionStatus.expiryDate ? 
+                  new Date(subscriptionStatus.expiryDate).toLocaleDateString('fr-FR', {
+                    day: 'numeric',
+                    month: 'short'
+                  }) : 'récemment'}
+              </div>
+              <button
+                onClick={onUpgrade}
+                className="mt-2 w-full bg-white/20 hover:bg-white/30 rounded text-xs py-1 transition-colors"
+              >
+                Renouveler
+              </button>
+            </div>
+          ) : subscriptionStatus.isExpiringSoon && user?.isAdmin ? (
+            <div className="bg-gradient-to-r from-orange-500 to-amber-500 rounded-lg p-3 text-white text-center">
+              <div className="text-xs font-medium mb-1">⏰ Expire bientôt</div>
+              <div className="text-xs opacity-90">
+                {subscriptionStatus.daysRemaining} jour{subscriptionStatus.daysRemaining > 1 ? 's' : ''} restant{subscriptionStatus.daysRemaining > 1 ? 's' : ''}
+              </div>
+              <button
+                onClick={onUpgrade}
+                className="mt-2 w-full bg-white/20 hover:bg-white/30 rounded text-xs py-1 transition-colors"
+              >
+                Renouveler
+              </button>
+            </div>
+          ) : isProActive ? (
             <div className="bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg p-3 text-white text-center">
               <div className="text-xs font-medium mb-1">👑 Pro</div>
               {user?.company.expiryDate && (

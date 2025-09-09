@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useSubscriptionStatus } from '../../hooks/useSubscriptionStatus';
 import { Bell, Search, User, LogOut, Globe, Menu } from 'lucide-react';
 
 interface HeaderProps {
@@ -11,6 +12,7 @@ interface HeaderProps {
 export default function Header({ sidebarOpen, setSidebarOpen }: HeaderProps) {
   const { user, logout } = useAuth();
   const { language, setLanguage } = useLanguage();
+  const subscriptionStatus = useSubscriptionStatus();
   
   const handleLogout = async () => {
     try {
@@ -58,13 +60,27 @@ export default function Header({ sidebarOpen, setSidebarOpen }: HeaderProps) {
             <div className="text-lg font-bold text-gray-900 uppercase">
               {user.company.name}
               {!user.isAdmin && user.email !== 'admin@facture.ma' && (
-                <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                  Utilisateur
+                <span className={`ml-2 text-xs px-2 py-1 rounded-full ${
+                  subscriptionStatus.shouldBlockUser 
+                    ? 'bg-red-100 text-red-800' 
+                    : 'bg-blue-100 text-blue-800'
+                }`}>
+                  {subscriptionStatus.shouldBlockUser ? 'Bloqué' : 'Utilisateur'}
                 </span>
               )}
               {user.email === 'admin@facture.ma' && (
                 <span className="ml-2 text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">
                   Admin Plateforme
+                </span>
+              )}
+              {subscriptionStatus.isExpired && user.isAdmin && (
+                <span className="ml-2 text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full animate-pulse">
+                  ⚠️ Expiré
+                </span>
+              )}
+              {subscriptionStatus.isExpiringSoon && user.isAdmin && (
+                <span className="ml-2 text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full animate-pulse">
+                  ⏰ {subscriptionStatus.daysRemaining}j
                 </span>
               )}
             </div>

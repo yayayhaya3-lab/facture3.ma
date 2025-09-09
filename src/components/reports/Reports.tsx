@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useData } from '../../contexts/DataContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useSubscriptionStatus } from '../../hooks/useSubscriptionStatus';
 import { 
   BarChart3, 
   Crown,
@@ -40,6 +41,7 @@ export default function Reports() {
   const { t } = useLanguage();
   const { invoices, clients, products } = useData();
   const { user } = useAuth();
+  const subscriptionStatus = useSubscriptionStatus();
   const [selectedPeriod, setSelectedPeriod] = useState('month');
   const [selectedClient, setSelectedClient] = useState('all');
   const [selectedProduct, setSelectedProduct] = useState('all');
@@ -50,7 +52,7 @@ export default function Reports() {
 
   // Vérifier l'accès PRO
   const isProActive = user?.company.subscription === 'pro' && user?.company.expiryDate && 
-    new Date(user.company.expiryDate) > new Date();
+    !subscriptionStatus.isExpired;
 
   if (!isProActive) {
     return (
@@ -65,11 +67,16 @@ export default function Reports() {
           <p className="text-gray-600 mb-6">
             La Gestion financière est réservée aux abonnés PRO. 
             Passez à la version PRO pour accéder à cette fonctionnalité avancée.
+           {subscriptionStatus.isExpired && (
+             <span className="block mt-2 text-red-600 font-medium">
+               ⚠️ Votre abonnement Pro a expiré. Renouvelez-le pour retrouver l'accès.
+             </span>
+           )}
           </p>
           <button className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200">
             <span className="flex items-center justify-center space-x-2">
               <Crown className="w-5 h-5" />
-              <span>Passer à PRO - 299 MAD/mois</span>
+             <span>{subscriptionStatus.isExpired ? 'Renouveler' : 'Passer à'} PRO - 299 MAD/mois</span>
             </span>
           </button>
         </div>

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Building2, Lock, Mail, ArrowLeft, UserPlus } from 'lucide-react';
+import ExpiredAccountModal from './ExpiredAccountModal';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -10,6 +11,11 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [showRegister, setShowRegister] = useState(false);
+  const [showExpiredModal, setShowExpiredModal] = useState(false);
+  const [expiredAccountData, setExpiredAccountData] = useState<{
+    isAdmin: boolean;
+    expiryDate: string;
+  } | null>(null);
   
   const { login } = useAuth();
   const { language, setLanguage, t } = useLanguage();
@@ -24,8 +30,24 @@ export default function Login() {
       if (!success) {
         setError('Email ou mot de passe incorrect');
       }
-    } catch (err) {
-      setError('Erreur de connexion');
+    } catch (err: any) {
+      if (err.message === 'SUBSCRIPTION_EXPIRED') {
+        // Récupérer les informations sur l'abonnement expiré
+        try {
+          // Vérifier si c'est un admin ou un utilisateur géré
+          const isAdminAccount = email !== 'admin@facture.ma' && !email.includes('@');
+          
+          setExpiredAccountData({
+            isAdmin: !isAdminAccount,
+            expiryDate: new Date().toISOString() // Vous pouvez récupérer la vraie date d'expiration
+          });
+          setShowExpiredModal(true);
+        } catch {
+          setError('Abonnement expiré. Contactez l\'administrateur.');
+        }
+      } else {
+        setError('Erreur de connexion');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -162,6 +184,19 @@ export default function Login() {
           </div>
         </form>
       </div>
+      
+      {/* Modal d'abonnement expiré */}
+      {showExpiredModal && expiredAccountData && (
+        <ExpiredAccountModal
+          isOpen={showExpiredModal}
+          onClose={() => {
+            setShowExpiredModal(false);
+            setExpiredAccountData(null);
+          }}
+          isAdmin={expiredAccountData.isAdmin}
+          expiryDate={expiredAccountData.expiryDate}
+        />
+      )}
     </div>
   );
 }

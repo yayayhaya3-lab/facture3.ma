@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
+import { useSubscriptionStatus } from '../../hooks/useSubscriptionStatus';
 import { 
   TrendingUp, 
   Package, 
@@ -28,6 +29,7 @@ import html2pdf from 'html2pdf.js';
 
 export default function StockManagement() {
   const { user } = useAuth();
+  const subscriptionStatus = useSubscriptionStatus();
   const { products, invoices } = useData();
   const [selectedProduct, setSelectedProduct] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -37,7 +39,7 @@ export default function StockManagement() {
 
   // Vérifier l'accès PRO
   const isProActive = user?.company.subscription === 'pro' && user?.company.expiryDate && 
-    new Date(user.company.expiryDate) > new Date();
+    !subscriptionStatus.isExpired;
 
   if (!isProActive) {
     return (
@@ -52,11 +54,16 @@ export default function StockManagement() {
           <p className="text-gray-600 mb-6">
             La Gestion de Stock est réservée aux abonnés PRO. 
             Passez à la version PRO pour accéder à cette fonctionnalité avancée.
+           {subscriptionStatus.isExpired && (
+             <span className="block mt-2 text-red-600 font-medium">
+               ⚠️ Votre abonnement Pro a expiré. Renouvelez-le pour retrouver l'accès.
+             </span>
+           )}
           </p>
           <button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200">
             <span className="flex items-center justify-center space-x-2">
               <Crown className="w-5 h-5" />
-              <span>Passer à PRO - 299 MAD/mois</span>
+             <span>{subscriptionStatus.isExpired ? 'Renouveler' : 'Passer à'} PRO - 299 MAD/mois</span>
             </span>
           </button>
         </div>

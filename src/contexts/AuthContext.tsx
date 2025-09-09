@@ -9,6 +9,7 @@ import {
 import { doc, getDoc, setDoc, updateDoc, query, collection, where, getDocs } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
 import { ManagedUser } from './UserManagementContext';
+import { useSubscriptionStatus } from '../hooks/useSubscriptionStatus';
 
 interface Company {
   name: string;
@@ -70,6 +71,9 @@ interface AuthContextType {
   showExpiryAlert: boolean;
   setShowExpiryAlert: (show: boolean) => void;
   expiredDate: string | null;
+  isSubscriptionExpired: boolean;
+  isSubscriptionExpiringSoon: boolean;
+  subscriptionDaysRemaining: number;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -80,6 +84,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [showExpiryAlert, setShowExpiryAlert] = useState(false);
   const [expiredDate, setExpiredDate] = useState<string | null>(null);
+  const [isSubscriptionExpired, setIsSubscriptionExpired] = useState(false);
+  const [isSubscriptionExpiringSoon, setIsSubscriptionExpiringSoon] = useState(false);
+  const [subscriptionDaysRemaining, setSubscriptionDaysRemaining] = useState(0);
 
   // Fonction pour vérifier si un utilisateur géré existe
   const checkManagedUser = async (email: string, password: string): Promise<ManagedUser | null> => {
@@ -110,8 +117,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (userData.subscription === 'pro' && userData.expiryDate) {
       const currentDate = new Date();
       const expiryDate = new Date(userData.expiryDate);
+      const timeDiff = expiryDate.getTime() - currentDate.getTime();
+      const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
       
-      if (currentDate > expiryDate) {
+      setIsSubscriptionExpired(daysRemaining <= 0);
+      setIsSubscriptionExpiringSoon(daysRemaining > 0 && daysRemaining <= 5);
+      setSubscriptionDaysRemaining(Math.max(0, daysRemaining));
+      
+      if (daysRemaining <= 0) {
         // L'abonnement a expiré, repasser en version gratuite
         try {
           await updateDoc(doc(db, 'entreprises', userId), {
@@ -145,6 +158,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           console.error('Erreur lors de la mise à jour de l\'expiration:', error);
         }
       }
+    } else {
+      setIsSubscriptionExpired(false);
+      setIsSubscriptionExpiringSoon(false);
+      setSubscriptionDaysRemaining(0);
     }
   };
 
@@ -245,6 +262,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (companyDoc.exists()) {
           const companyData = companyDoc.data();
           
+          // Vérifier si l'abonnement Pro est expiré pour les utilisateurs gérés
+          if (companyData.subscription === 'pro' && companyData.expiryDate) {
+            const currentDate = new Date();
+            const expiryDate = new Date(companyData.expiryDate);
+            
+            if (currentDate > expiryDate) {
+              // L'abonnement est expiré, bloquer la connexion des utilisateurs gérés
+              throw new Error('SUBSCRIPTION_EXPIRED');
+            }
+          }
+          
           // Mettre à jour la dernière connexion
           await updateDoc(doc(db, 'managedUsers', managedUser.id), {
             lastLogin: new Date().toISOString()
@@ -292,7 +320,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Sinon, essayer la connexion Firebase normale (admin)
       await signInWithEmailAndPassword(auth, email, password);
       return true;
-    } catch (error) {
+    } catch (error: any) {
+      if (error.message === 'SUBSCRIPTION_EXPIRED') {
+        // Erreur spéciale pour abonnement expiré
+        throw new Error('SUBSCRIPTION_EXPIRED');
+      }
       console.error('Erreur de connexion:', error);
       return false;
     }
@@ -432,6 +464,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     showExpiryAlert,
     setShowExpiryAlert,
     expiredDate,
+    isSubscriptionExpired,
+    isSubscriptionExpiringSoon,
+    subscriptionDaysRemaining,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
